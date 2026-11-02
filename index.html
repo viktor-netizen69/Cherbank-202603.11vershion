@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Черьбанк Онлайн — Официальная система RP-банкинга</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cher: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              200: '#b9dffe',
+              300: '#7cc3fd',
+              400: '#36a3f9',
+              500: '#0d85ec',
+              600: '#0267c7',
+              700: '#0352a1',
+              800: '#074685',
+              900: '#0b3a6f',
+              950: '#072449',
+            },
+            accent: {
+              gold: '#d4af37',
+              goldLight: '#f3e5ab',
+              cyan: '#06b6d4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Плавные скроллбары */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #060b14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e2c44;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0284c7;
+    }
+
+    /* Дизайны банковских карт */
+    .skin-default {
+      background: linear-gradient(135deg, #091a33 0%, #102a52 45%, #08406f 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    .skin-gold {
+      background: linear-gradient(135deg, #1f1a10 0%, #2f2514 50%, #594519 100%);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+    }
+    .skin-cyber {
+      background: linear-gradient(135deg, #180928 0%, #300e52 50%, #092c4c 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+    .skin-emerald {
+      background: linear-gradient(135deg, #041f17 0%, #063f2f 50%, #0d5e42 100%);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .skin-carbon {
+      background: radial-gradient(black 15%, transparent 16%) 0 0, radial-gradient(black 15%, transparent 16%) 8px 8px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+      background-color: #12141a;
+      background-size: 16px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    .card-pattern-overlay {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
+    .card-shine {
+      background: linear-gradient(125deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0) 70%);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans selection:bg-cher-600 selection:text-white bg-[#050b14] text-slate-100">
+
+  <!-- Всплывающие уведомления (Toasts) -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- ========================================== -->
+  <!-- 1. АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ               -->
+  <!-- ========================================== -->
+  <div id="auth-screen" class="min-h-full flex items-center justify-center p-4 bg-gradient-to-br from-[#040810] via-[#09152b] to-[#040810]">
+    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+      
+      <!-- Декоративные световые ореолы -->
+      <div class="absolute -top-20 -right-20 w-44 h-44 bg-cher-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-20 -left-20 w-44 h-44 bg-accent-cyan/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Фирменный заголовок Черьбанк -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 mb-3 rounded-2xl bg-gradient-to-tr from-cher-700 to-cher-500 text-white shadow-xl shadow-cher-600/30 border border-cher-400/30">
+          <i data-lucide="landmark" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-2xl font-black tracking-tight text-white flex items-center justify-center gap-1.5">
+          <span>ЧЕРЬ</span><span class="text-cher-400">БАНК</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Официальный интернет-банкинг</p>
+      </div>
+
+      <!-- Вкладки: Вход / Регистрация -->
+      <div class="flex p-1 bg-slate-950/80 rounded-xl mb-6 border border-slate-800">
+        <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-white bg-slate-800 shadow">
+          Вход
+        </button>
+        <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white">
+          Регистрация
+        </button>
+      </div>
+
+      <!-- Форма Входа -->
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Никнейм</label>
+          <div class="relative">
+            <i data-lucide="user" class="absolute left-3.5 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="text" id="login-username" required placeholder="Введите ваш никнейм" autocomplete="off"
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Пароль</label>
+          <div class="relative">
+            <i data-lucide="lock" class="absolute left-3.5 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="password" id="login-password" required placeholder="Введите пароль"
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cher-600 to-cher-500 hover:from-cher-500 hover:to-cher-400 text-white font-bold rounded-xl shadow-lg shadow-cher-600/30 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>Войти в Черьбанк</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+
+      <!-- Форма Регистрации -->
+      <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Желаемый никнейм</label>
+          <div class="relative">
+            <i data-lucide="user-plus" class="absolute left-3.5 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="text" id="reg-username" required placeholder="Придумайте никнейм" autocomplete="off"
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Пароль</label>
+          <div class="relative">
+            <i data-lucide="key" class="absolute left-3.5 top-3 w-4 h-4 text-slate-500"></i>
+            <input type="password" id="reg-password" required placeholder="Придумайте пароль"
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cher-600 to-cher-500 hover:from-cher-500 hover:to-cher-400 text-white font-bold rounded-xl shadow-lg shadow-cher-600/30 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <span>Открыть счёт</span>
+          <i data-lucide="check" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 2. ОСНОВНОЙ ЛИЧНЫЙ КАБИНЕТ БАНКА           -->
+  <!-- ========================================== -->
+  <div id="main-app" class="hidden min-h-full flex flex-col bg-[#050b14]">
+    
+    <!-- Верхняя шапка кабинета -->
+    <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-30 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 sm:h-20">
+          
+          <!-- Бренд и логотип -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-cher-700 to-cher-500 flex items-center justify-center text-white shadow-md border border-cher-400/30 shrink-0">
+              <i data-lucide="landmark" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+            </div>
+            <div>
+              <div class="font-black tracking-tight text-lg sm:text-xl text-white flex items-center gap-1">
+                <span>ЧЕРЬ</span><span class="text-cher-400">БАНК</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Официальный интернет-банкинг</div>
+            </div>
+          </div>
+
+          <!-- Профиль игрока -->
+          <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex items-center gap-2.5">
+              <div class="relative">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-cher-400 font-bold text-base" id="user-avatar-letter">
+                  U
+                </div>
+                <!-- Бейдж галочки верификации в аватаре -->
+                <div id="verified-avatar-badge" class="hidden absolute -bottom-1 -right-1 w-4 h-4 bg-cher-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white" title="Верифицированный аккаунт">
+                  <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                </div>
+              </div>
+              <div class="hidden sm:block text-left">
+                <div class="flex items-center gap-1.5">
+                  <span id="header-username" class="text-sm font-bold text-slate-100">Пользователь</span>
+                  <!-- Синяя галочка верификации -->
+                  <span id="header-verified-icon" class="hidden text-cher-400" title="Верифицированный персонаж">
+                    <i data-lucide="badge-check" class="w-4 h-4 fill-cher-500/20 text-cher-400"></i>
+                  </span>
+                  <!-- Бейдж ЧерьПлюс -->
+                  <span id="header-plus-badge" class="hidden text-[9px] font-bold bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 px-1.5 py-0.5 rounded font-mono">
+                    PLUS
+                  </span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span id="header-role-badge" class="text-[11px] text-slate-400 font-semibold">Клиент банка</span>
+                  <a id="header-bio-link" href="#" target="_blank" class="hidden text-[11px] text-cher-400 hover:text-cher-300 hover:underline flex items-center gap-1">
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                    <span>Биография</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Кнопка Выход -->
+            <button onclick="handleLogout()" class="p-2.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 rounded-xl transition" title="Выйти из аккаунта">
+              <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Вкладки навигации -->
+      <div class="border-t border-slate-800/80 bg-slate-900/60 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex items-center gap-1 sm:gap-2 overflow-x-auto py-2">
+          <button onclick="setTab('dashboard')" id="nav-dashboard" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap bg-cher-500/15 text-cher-300 border border-cher-500/30">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Главная</span>
+          </button>
+          <button onclick="setTab('transfers')" id="nav-transfers" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <span>Переводы</span>
+          </button>
+          <button onclick="setTab('loans')" id="nav-loans" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+            <i data-lucide="landmark" class="w-4 h-4"></i>
+            <span>ЧерьКредит</span>
+          </button>
+          <button onclick="setTab('deposits')" id="nav-deposits" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+            <i data-lucide="piggy-bank" class="w-4 h-4"></i>
+            <span>ЧерьВклад</span>
+          </button>
+          <button onclick="setTab('plus')" id="nav-plus" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            <span>ЧерьПлюс</span>
+          </button>
+          <button onclick="setTab('history')" id="nav-history" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+            <span>История</span>
+          </button>
+          
+          <!-- Кнопка панели управления: СТРОГО СКРЫТА ДЛЯ ВСЕХ КРОМЕ ADMIN -->
+          <button onclick="setTab('admin')" id="nav-admin" style="display: none;" class="tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition whitespace-nowrap text-amber-400 hover:bg-amber-500/10 border border-amber-500/40">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+            <span>Панель управления</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Предупреждение о заморозке счета -->
+    <div id="frozen-warning-bar" class="hidden bg-rose-950/90 border-b border-rose-800 text-rose-200 px-4 py-2.5 text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
+      <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+      <span>Счёт заморожен службой безопасности банка. Исходящие переводы и операции недоступны.</span>
+    </div>
+
+    <!-- Основной контейнер содержимого -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+      <!-- ================= ВКЛАДКА 1: ДАШБОРД ================= -->
+      <section id="tab-content-dashboard" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Банковская карта Черьбанк -->
+          <div class="lg:col-span-1 space-y-4">
+            <div id="bank-card-container" class="relative w-full aspect-[1.58/1] rounded-3xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 skin-default text-white">
+              <div class="absolute inset-0 card-pattern-overlay pointer-events-none"></div>
+              <div class="absolute inset-0 card-shine pointer-events-none"></div>
+
+              <!-- Верх карты: Логотип и значок подписки -->
+              <div class="flex items-center justify-between z-10">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-cher-300"></i>
+                  </div>
+                  <div>
+                    <span class="font-black text-sm tracking-wide">ЧЕРЬБАНК</span>
+                    <span id="card-skin-badge" class="block text-[8px] font-mono tracking-wider text-cher-300 uppercase">ДЕБЕТОВАЯ КАРТА</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <span id="card-plus-pill" class="hidden text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 px-2 py-0.5 rounded-full shadow">
+                    CHER+
+                  </span>
+                  <i data-lucide="wifi" class="w-5 h-5 text-slate-300 rotate-90"></i>
+                </div>
+              </div>
+
+              <!-- Чип -->
+              <div class="z-10 my-1 flex items-center justify-between">
+                <div class="w-11 h-8 rounded-md bg-gradient-to-r from-amber-200 to-yellow-400 border border-yellow-600/50 shadow-inner flex flex-col justify-around p-1 opacity-90">
+                  <div class="w-full h-0.5 bg-yellow-700/40"></div>
+                  <div class="w-full h-0.5 bg-yellow-700/40"></div>
+                </div>
+              </div>
+
+              <!-- Номер карты -->
+              <div class="z-10">
+                <div class="text-[9px] text-slate-300 uppercase tracking-widest font-semibold mb-0.5">Номер счёта</div>
+                <div class="flex items-center justify-between">
+                  <span id="card-display-number" class="font-mono text-base sm:text-lg tracking-widest font-bold drop-shadow">
+                    4276 •••• •••• 0000
+                  </span>
+                  <button onclick="copyCardNumber()" class="text-cher-300 hover:text-white p-1 rounded transition" title="Скопировать номер">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Владелец -->
+              <div class="flex items-end justify-between z-10 pt-2 border-t border-white/10">
+                <div>
+                  <div class="text-[8px] uppercase tracking-wider text-slate-300">Держатель</div>
+                  <div id="card-display-name" class="font-mono text-xs sm:text-sm font-bold tracking-wide uppercase truncate max-w-[160px] flex items-center gap-1">
+                    <span>PLAYER</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[8px] uppercase tracking-wider text-slate-300">Статус</div>
+                  <div id="card-status-text" class="font-mono text-xs font-bold text-emerald-400">АКТИВЕН</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="grid grid-cols-2 gap-3">
+              <button onclick="setTab('transfers')" class="py-3 px-4 bg-slate-900 border border-slate-800 hover:border-cher-500/50 rounded-2xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-200 hover:text-cher-400 transition shadow">
+                <i data-lucide="send" class="w-4 h-4 text-cher-400"></i>
+                <span>Перевести</span>
+              </button>
+              <button onclick="setTab('plus')" class="py-3 px-4 bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl flex items-center justify-center gap-2 text-xs font-semibold text-slate-200 hover:text-amber-400 transition shadow">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                <span>ЧерьПлюс</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Сводка баланса и последние движения средств -->
+          <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xl">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div class="text-xs uppercase font-semibold tracking-wider text-slate-400">Баланс банковского счёта</div>
+                  <div id="dash-bank-balance" class="text-4xl sm:text-5xl font-extrabold text-cher-400 font-mono mt-1">
+                    $0
+                  </div>
+                </div>
+                <!-- Инфо-бейджи кредитов и вкладов -->
+                <div class="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 mt-2 sm:mt-0 font-mono text-xs">
+                  <div id="dash-deposit-badge" class="hidden px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl">
+                    Вклад: <span id="dash-deposit-val" class="font-bold">$0</span>
+                  </div>
+                  <div id="dash-loan-badge" class="hidden px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-xl">
+                    Долг по кредиту: <span id="dash-loan-val" class="font-bold">$0</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-400 mt-4 flex items-center justify-between pt-4 border-t border-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Сеть Черьбанка функционирует штатно</span>
+                </div>
+                <div id="dash-commission-info" class="text-[11px] text-slate-400">
+                  Комиссия на переводы: <span class="font-bold text-cher-300" id="dash-fee-rate">3%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Недавние операции -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                  <i data-lucide="clock" class="w-4 h-4 text-cher-400"></i>
+                  <span>Последние транзакции</span>
+                </h3>
+                <button onclick="setTab('history')" class="text-xs font-semibold text-cher-400 hover:underline">
+                  Вся история
+                </button>
+              </div>
+
+              <div id="dash-recent-list" class="space-y-3">
+                <!-- Рендерится через JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 2: ПЕРЕВОДЫ ================= -->
+      <section id="tab-content-transfers" class="hidden max-w-2xl mx-auto space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+            <div class="w-12 h-12 rounded-2xl bg-cher-500/10 text-cher-400 flex items-center justify-center">
+              <i data-lucide="send" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">Перевод средств клиенту банка</h2>
+              <p class="text-xs text-slate-400">Безналичный перевод по никнейму или 16-значному номеру карты</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleTransferSubmit(event)" class="space-y-5">
+            <!-- Получатель -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Получатель (Никнейм или номер карты)
+              </label>
+              <div class="relative">
+                <i data-lucide="user-check" class="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500"></i>
+                <input type="text" id="transfer-recipient" required placeholder="Введите ник или 16 цифр карты"
+                  class="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition font-mono">
+              </div>
+            </div>
+
+            <!-- Сумма перевода -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Сумма ($)</label>
+                <button type="button" onclick="setTransferMax()" class="text-xs text-cher-400 font-semibold hover:underline">
+                  Вся доступная сумма
+                </button>
+              </div>
+              <div class="relative">
+                <span class="absolute left-3.5 top-3 text-slate-500 font-bold">$</span>
+                <input type="number" id="transfer-amount" min="1" step="1" required placeholder="0" oninput="updateTransferFeeCalculation()"
+                  class="w-full pl-8 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-lg font-bold font-mono focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-cher-400 placeholder-slate-600 transition">
+              </div>
+            </div>
+
+            <!-- Расчет комиссии -->
+            <div id="transfer-fee-box" class="p-4 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>Базовая комиссия перевода:</span>
+                <span id="transfer-fee-rate-text" class="font-mono text-slate-300">3%</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Сумма комиссии:</span>
+                <span id="transfer-fee-amount-text" class="font-mono text-rose-400">$0</span>
+              </div>
+              <div class="flex justify-between font-bold text-white border-t border-slate-800 pt-2">
+                <span>Итого к списанию с вашего счета:</span>
+                <span id="transfer-total-amount-text" class="font-mono text-cher-400 text-sm">$0</span>
+              </div>
+              <div id="transfer-plus-perk" class="hidden text-amber-400 text-[11px] font-semibold flex items-center gap-1.5 pt-1">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Применена скидка «ЧерьПлюс» — комиссия 0%!</span>
+              </div>
+            </div>
+
+            <!-- Назначение платежа -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Назначение перевода (RP цель)
+              </label>
+              <div class="relative">
+                <i data-lucide="message-square" class="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500"></i>
+                <input type="text" id="transfer-comment" required placeholder="Например: Покупка авто, долг, зарплата фракции"
+                  class="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm focus:border-cher-400 focus:ring-1 focus:ring-cher-400 outline-none text-white placeholder-slate-600 transition">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-cher-600 to-cher-500 hover:from-cher-500 hover:to-cher-400 text-white font-bold rounded-xl shadow-lg shadow-cher-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2 mt-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Подтвердить отправку средств</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 3: ЧЕРЬКРЕДИТ ================= -->
+      <section id="tab-content-loans" class="hidden max-w-4xl mx-auto space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+              <i data-lucide="landmark" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">ЧерьКредит — Кредитование игроков</h2>
+              <p class="text-xs text-slate-400">Быстрое финансирование любых ваших RP-проектов и покупок</p>
+            </div>
+          </div>
+
+          <!-- Активный кредит игрока (если есть) -->
+          <div id="loan-active-container" class="hidden mb-6 p-6 bg-gradient-to-br from-rose-950/40 via-slate-950 to-slate-900 border border-rose-800/60 rounded-3xl space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5 text-rose-400"></i>
+                <h3 class="font-bold text-white">У вас есть непогашенный кредит</h3>
+              </div>
+              <span id="loan-status-tag" class="text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-full">АКТИВЕН</span>
+            </div>
+
+            <!-- Баннер просрочки со штрафом -->
+            <div id="loan-overdue-banner" class="hidden p-3 bg-rose-950/80 border border-rose-700/80 rounded-xl text-xs text-rose-200 flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 shrink-0"></i>
+              <span>Срок займа истёк! Начислен штраф за несвоевременное погашение.</span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Остаток долга</div>
+                <div id="loan-debt-val" class="text-lg font-bold font-mono text-rose-400 mt-0.5">$0</div>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Сумма займа</div>
+                <div id="loan-principal-val" class="text-lg font-bold font-mono text-slate-200 mt-0.5">$0</div>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Ставка</div>
+                <div id="loan-rate-val" class="text-lg font-bold font-mono text-amber-400 mt-0.5">0%</div>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Срок погашения</div>
+                <div id="loan-term-val" class="text-lg font-bold font-mono text-slate-200 mt-0.5">0 дн.</div>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-800/80">
+              <div class="flex-1">
+                <input type="number" id="loan-repay-amount" placeholder="Сумма погашения ($)"
+                  class="w-full py-2.5 px-4 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white font-mono outline-none focus:border-rose-500">
+              </div>
+              <button onclick="handleRepayLoan(false)" class="py-2.5 px-5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs transition">
+                Внести часть
+              </button>
+              <button onclick="handleRepayLoan(true)" class="py-2.5 px-5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
+                Погасить весь долг
+              </button>
+            </div>
+          </div>
+
+          <!-- Форма получения нового кредита с ползунками -->
+          <div id="loan-request-container">
+            <!-- Условия от банка -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
+              <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                <div class="text-[11px] text-slate-400 uppercase font-semibold">Процентная ставка</div>
+                <div id="loan-card-rate" class="text-xl font-bold font-mono text-amber-400 mt-1">10%</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Фиксированная ставка</div>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                <div class="text-[11px] text-slate-400 uppercase font-semibold">Макс. лимит займа</div>
+                <div id="loan-card-max" class="text-xl font-bold font-mono text-cher-400 mt-1">$50,000</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Лимит банка</div>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                <div class="text-[11px] text-slate-400 uppercase font-semibold">Максимальный срок</div>
+                <div id="loan-card-days" class="text-xl font-bold font-mono text-slate-200 mt-1">7 дн.</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Период займа</div>
+              </div>
+              <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                <div class="text-[11px] text-slate-400 uppercase font-semibold">Штраф за просрочку</div>
+                <div id="loan-card-penalty" class="text-xl font-bold font-mono text-rose-400 mt-1">$1,000</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">При нарушении срока</div>
+              </div>
+            </div>
+
+            <form onsubmit="handleLoanRequest(event)" class="space-y-6">
+              <!-- Ползунок 1: Сумма займа -->
+              <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Сумма кредита ($)</label>
+                  <div class="text-lg font-black font-mono text-cher-400" id="loan-amount-display">$1,000</div>
+                </div>
+                <input type="range" id="loan-amount-slider" min="1000" max="50000" step="500" value="1000" oninput="onLoanSlidersChange()"
+                  class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cher-500">
+                <div class="flex justify-between text-[11px] font-mono text-slate-500">
+                  <span>Мин: $1,000</span>
+                  <span id="loan-slider-max-label">Макс: $50,000</span>
+                </div>
+              </div>
+
+              <!-- Ползунок 2: Срок займа -->
+              <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">Срок кредита (дней)</label>
+                  <div class="text-lg font-black font-mono text-amber-400" id="loan-term-display">3 дня</div>
+                </div>
+                <input type="range" id="loan-term-slider" min="3" max="7" step="1" value="3" oninput="onLoanSlidersChange()"
+                  class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                <div class="flex justify-between text-[11px] font-mono text-slate-500">
+                  <span>Мин: 3 дня</span>
+                  <span id="loan-term-max-label">Макс: 7 дн.</span>
+                </div>
+              </div>
+
+              <!-- Превью расчета -->
+              <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 text-xs font-mono">
+                <div class="flex justify-between text-slate-400">
+                  <span>Переплата (процент по займу):</span>
+                  <span id="loan-preview-interest" class="text-amber-400 font-bold">+$0</span>
+                </div>
+                <div class="flex justify-between text-slate-400 border-t border-slate-800 pt-2 font-bold text-white">
+                  <span>Итого к возврату в банк:</span>
+                  <span id="loan-preview-total" class="text-rose-400 text-sm">$0</span>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold rounded-xl shadow-lg shadow-amber-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Получить кредитные средства на карту</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 4: ЧЕРЬВКЛАД ================= -->
+      <section id="tab-content-deposits" class="hidden max-w-4xl mx-auto space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">ЧерьВклад — Доходные депозиты</h2>
+              <p class="text-xs text-slate-400">Инвестируйте в Черьбанк и получайте стабильный пассивный доход</p>
+            </div>
+          </div>
+
+          <!-- Активный депозит -->
+          <div id="deposit-active-container" class="hidden mb-6 p-6 bg-gradient-to-br from-emerald-950/40 via-slate-950 to-slate-900 border border-emerald-800/60 rounded-3xl space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+                <h3 class="font-bold text-white">Ваш активный депозитный вклад</h3>
+              </div>
+              <span class="text-xs font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full">ДЕЙСТВУЕТ</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Тело вклада</div>
+                <div id="deposit-body-val" class="text-xl font-bold font-mono text-white mt-0.5">$0</div>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Ожидаемая прибыль</div>
+                <div id="deposit-profit-val" class="text-xl font-bold font-mono text-emerald-400 mt-0.5">+$0</div>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                <div class="text-[10px] text-slate-400 uppercase">Доходная ставка</div>
+                <div id="deposit-rate-val" class="text-xl font-bold font-mono text-cher-400 mt-0.5">5%</div>
+              </div>
+            </div>
+
+            <!-- Статус ожидания выплаты процентов (защита от частого клика) -->
+            <div id="deposit-lock-status-box" class="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <i data-lucide="hourglass" class="w-4 h-4 text-amber-400"></i>
+                <span id="deposit-lock-text" class="text-slate-300 font-mono">Начисление процентов: ожидание</span>
+              </div>
+              <span id="deposit-lock-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/30">В ОЖИДАНИИ</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-800/80">
+              <button id="btn-collect-deposit-profit" onclick="handleCollectDepositProfit()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+                <span>Начислить прибыль на карту</span>
+              </button>
+              <button onclick="handleCloseDeposit()" class="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl text-xs transition">
+                Закрыть вклад и забрать всё
+              </button>
+            </div>
+          </div>
+
+          <!-- Открытие нового депозита -->
+          <div id="deposit-create-container">
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <div class="text-xs uppercase font-semibold text-slate-400">Условия по ЧерьВкладу</div>
+                <div class="flex items-center gap-3 mt-1">
+                  <div class="text-2xl font-extrabold font-mono text-emerald-400" id="deposit-stat-rate">5%</div>
+                  <span class="text-xs text-slate-500 font-mono">• Выплата каждые <span id="deposit-stat-days" class="text-slate-300 font-bold">3 дня</span></span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Доход начисляется строго по истечении указанного банком срока</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+              </div>
+            </div>
+
+            <form onsubmit="handleCreateDeposit(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Сумма для размещения во вклад ($)
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-3 text-slate-500 font-bold">$</span>
+                  <input type="number" id="deposit-amount-input" min="100" step="50" required placeholder="1000"
+                    class="w-full pl-8 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-lg font-bold font-mono focus:border-emerald-500 outline-none text-emerald-400">
+                </div>
+              </div>
+
+              <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Открыть ЧерьВклад</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 5: ЧЕРЬПЛЮС И КАСТОМИЗАЦИЯ ================= -->
+      <section id="tab-content-plus" class="hidden max-w-4xl mx-auto space-y-6">
+        
+        <!-- Карточка подписки ЧерьПлюс -->
+        <div class="bg-gradient-to-br from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/30 shrink-0">
+                <i data-lucide="sparkles" class="w-8 h-8"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-2xl font-black text-white">ЧерьПлюс</h2>
+                  <span id="plus-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">НЕ АКТИВНА</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Премиальный статус для статусных игроков и проверенных персон</p>
+              </div>
+            </div>
+
+            <div>
+              <button id="btn-buy-plus" onclick="handleBuyCherPlus()" class="py-3 px-6 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black rounded-2xl shadow-lg shadow-amber-500/25 transition flex items-center gap-2 whitespace-nowrap">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                <span>Купить за $500</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Привилегии ЧерьПлюс -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-800/80">
+            <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <i data-lucide="percent" class="w-6 h-6 text-amber-400 mb-2"></i>
+              <h4 class="text-sm font-bold text-white">0% комиссия переводов</h4>
+              <p class="text-xs text-slate-400 mt-1">Никаких сборов на любые суммы внутри банковской сети.</p>
+            </div>
+            <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <i data-lucide="palette" class="w-6 h-6 text-amber-400 mb-2"></i>
+              <h4 class="text-sm font-bold text-white">Кастомные дизайны карт</h4>
+              <p class="text-xs text-slate-400 mt-1">Доступ к 5 эксклюзивным темам оформления банковской карты.</p>
+            </div>
+            <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <i data-lucide="badge-check" class="w-6 h-6 text-amber-400 mb-2"></i>
+              <h4 class="text-sm font-bold text-white">Статус в профиле</h4>
+              <p class="text-xs text-slate-400 mt-1">Особый золотой бейдж CHER+ на карте и в личном кабинете.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Выбор обложки карты -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+          <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+            <i data-lucide="palette" class="w-5 h-5 text-cher-400"></i>
+            <span>Коллекция обложек вашей карты</span>
+          </h3>
+          <p class="text-xs text-slate-400 mb-6">Доступно при наличии активной подписки ЧерьПлюс или официальной галочки</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- 1. Черь Сапфир -->
+            <div onclick="selectCardSkin('default')" class="skin-card cursor-pointer p-4 rounded-2xl border border-slate-800 bg-slate-950 hover:border-cher-400 transition relative overflow-hidden group">
+              <div class="w-full h-24 rounded-xl skin-default mb-3 p-3 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-white">ЧЕРЬБАНК</span>
+                <span class="text-[9px] font-mono text-cher-200">•••• 0000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Черь Сапфир</span>
+                <span id="skin-check-default" class="text-cher-400 text-xs hidden"><i data-lucide="check" class="w-4 h-4"></i></span>
+              </div>
+            </div>
+
+            <!-- 2. Черь Золото -->
+            <div onclick="selectCardSkin('gold')" class="skin-card cursor-pointer p-4 rounded-2xl border border-slate-800 bg-slate-950 hover:border-amber-400 transition relative overflow-hidden group">
+              <div class="w-full h-24 rounded-xl skin-gold mb-3 p-3 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-amber-300">ЧЕРЬБАНК</span>
+                <span class="text-[9px] font-mono text-amber-200">•••• 0000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Золотой Сапфир</span>
+                <span id="skin-check-gold" class="text-amber-400 text-xs hidden"><i data-lucide="check" class="w-4 h-4"></i></span>
+              </div>
+            </div>
+
+            <!-- 3. Киберпанк -->
+            <div onclick="selectCardSkin('cyber')" class="skin-card cursor-pointer p-4 rounded-2xl border border-slate-800 bg-slate-950 hover:border-purple-400 transition relative overflow-hidden group">
+              <div class="w-full h-24 rounded-xl skin-cyber mb-3 p-3 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-purple-300">ЧЕРЬБАНК</span>
+                <span class="text-[9px] font-mono text-cyan-300">•••• 0000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Киберпанк Неон</span>
+                <span id="skin-check-cyber" class="text-purple-400 text-xs hidden"><i data-lucide="check" class="w-4 h-4"></i></span>
+              </div>
+            </div>
+
+            <!-- 4. Изумруд RP -->
+            <div onclick="selectCardSkin('emerald')" class="skin-card cursor-pointer p-4 rounded-2xl border border-slate-800 bg-slate-950 hover:border-emerald-400 transition relative overflow-hidden group">
+              <div class="w-full h-24 rounded-xl skin-emerald mb-3 p-3 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-emerald-300">ЧЕРЬБАНК</span>
+                <span class="text-[9px] font-mono text-emerald-200">•••• 0000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Изумруд RP</span>
+                <span id="skin-check-emerald" class="text-emerald-400 text-xs hidden"><i data-lucide="check" class="w-4 h-4"></i></span>
+              </div>
+            </div>
+
+            <!-- 5. Карбон Нуар -->
+            <div onclick="selectCardSkin('carbon')" class="skin-card cursor-pointer p-4 rounded-2xl border border-slate-800 bg-slate-950 hover:border-slate-400 transition relative overflow-hidden group">
+              <div class="w-full h-24 rounded-xl skin-carbon mb-3 p-3 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-200">ЧЕРЬБАНК</span>
+                <span class="text-[9px] font-mono text-slate-400">•••• 0000</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">Карбон Нуар</span>
+                <span id="skin-check-carbon" class="text-slate-300 text-xs hidden"><i data-lucide="check" class="w-4 h-4"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 6: ИСТОРИЯ ================= -->
+      <section id="tab-content-history" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="file-text" class="w-5 h-5 text-cher-400"></i>
+                <span>История финансовых операций</span>
+              </h2>
+              <p class="text-xs text-slate-400">Полный журнал переводов, комиссий и начислений</p>
+            </div>
+
+            <!-- Фильтр -->
+            <div class="flex gap-2">
+              <button onclick="setHistoryFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-cher-500/20 text-cher-300 border border-cher-500/30">Все</button>
+              <button onclick="setHistoryFilter('in')" id="filter-in" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">Поступления</button>
+              <button onclick="setHistoryFilter('out')" id="filter-out" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">Списания</button>
+            </div>
+          </div>
+
+          <!-- Список операций -->
+          <div id="full-history-list" class="space-y-3">
+            <!-- Заполняется кодом -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= ВКЛАДКА 7: ПАНЕЛЬ УПРАВЛЕНИЯ (ТОЛЬКО ДЛЯ ADMIN) ================= -->
+      <section id="tab-content-admin" class="hidden space-y-6">
+        
+        <!-- Заголовок и глобальные банковские настройки -->
+        <div class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-2xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-xl font-black text-white">Панель Управления Черьбанком</h2>
+                  <span class="text-[10px] bg-amber-500/20 text-amber-300 font-mono px-2 py-0.5 rounded-full border border-amber-500/30">ADMIN MASTER</span>
+                </div>
+                <p class="text-xs text-slate-400">Полный контроль финансовых ставок, счетов игроков и транзакций</p>
+              </div>
+            </div>
+
+            <!-- Кнопка очистки базы -->
+            <button onclick="openResetModal()" class="px-4 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 text-xs font-bold rounded-xl transition flex items-center gap-2 shadow">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <span>Очистить базу данных</span>
+            </button>
+          </div>
+
+          <!-- Форма настроек банковской системы -->
+          <div class="mt-6 pt-6 border-t border-slate-800">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-4 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4"></i>
+              <span>Глобальные банковские параметры</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
+              <!-- Комиссия на переводы -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Комиссия переводов (%)</label>
+                <input type="number" id="setting-transfer-fee" min="0" max="50" step="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-cher-400 font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Кредитная ставка -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Ставка кредита (%)</label>
+                <input type="number" id="setting-loan-rate" min="0" max="100" step="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-amber-400 font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Макс. кредит -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Макс. кредит ($)</label>
+                <input type="number" id="setting-loan-max" min="1000" step="1000"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Срок кредита -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Макс. срок кредита (дн.)</label>
+                <input type="number" id="setting-loan-days" min="3" max="365" step="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Штраф за просрочку -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Штраф за просрочку ($)</label>
+                <input type="number" id="setting-loan-penalty" min="0" step="100"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-rose-400 font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Ставка по вкладу -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Ставка вклада (%)</label>
+                <input type="number" id="setting-deposit-rate" min="1" max="100" step="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-emerald-400 font-bold outline-none focus:border-amber-400">
+              </div>
+
+              <!-- Срок выплаты вклада -->
+              <div class="bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
+                <label class="block text-[10px] uppercase text-slate-400 font-semibold mb-1">Срок вклада (дней)</label>
+                <input type="number" id="setting-deposit-days" min="1" max="365" step="1"
+                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-emerald-400 font-bold outline-none focus:border-amber-400">
+              </div>
+            </div>
+
+            <div class="flex justify-end mt-3">
+              <button onclick="saveBankSettings()" class="py-2 px-5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                <span>Применить новые тарифы банка</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Таблица пользователей и управление ими -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="font-bold text-white text-base flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-amber-400"></i>
+              <span>Все зарегистрированные счета игроков</span>
+            </h3>
+            <div class="relative w-full sm:w-72">
+              <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
+              <input type="text" id="admin-search-input" oninput="renderAdminUsersTable()" placeholder="Поиск по нику или карте..."
+                class="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-amber-500 outline-none font-mono">
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse min-w-[700px]">
+              <thead>
+                <tr class="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+                  <th class="py-3 px-3">Никнейм / Статус</th>
+                  <th class="py-3 px-3">Номер карты</th>
+                  <th class="py-3 px-3">Баланс ($)</th>
+                  <th class="py-3 px-3">RP Биография</th>
+                  <th class="py-3 px-3">Верификация</th>
+                  <th class="py-3 px-3 text-right">Действия</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody" class="divide-y divide-slate-800/60 font-mono text-xs">
+                <!-- Рендерится через JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Глобальный журнал транзакций -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i data-lucide="scroll" class="w-5 h-5 text-amber-400"></i>
+            <span>Глобальный реестр транзакций сервера</span>
+          </h3>
+
+          <div class="overflow-x-auto max-h-96">
+            <table class="w-full text-left text-xs border-collapse min-w-[650px]">
+              <thead class="sticky top-0 bg-slate-900">
+                <tr class="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+                  <th class="py-2.5 px-3">Время</th>
+                  <th class="py-2.5 px-3">От кого</th>
+                  <th class="py-2.5 px-3">Кому</th>
+                  <th class="py-2.5 px-3">Сумма</th>
+                  <th class="py-2.5 px-3">Комиссия</th>
+                  <th class="py-2.5 px-3">Назначение</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-tbody" class="divide-y divide-slate-800/50 font-mono">
+                <!-- Рендерится через JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- МОДАЛЬНЫЕ ОКНА                             -->
+  <!-- ========================================== -->
+
+  <!-- Модальное окно: Чек транзакции -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative">
+      <button onclick="closeReceiptModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <div class="text-center pt-2 pb-4">
+        <div class="w-12 h-12 rounded-full bg-cher-500/20 text-cher-400 mx-auto flex items-center justify-center mb-2">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <div class="text-lg font-black text-white">ЧЕК ТРАНЗАКЦИИ</div>
+        <div class="text-xs text-slate-400 font-mono">Черьбанк Онлайн</div>
+      </div>
+
+      <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2.5 text-xs font-mono mb-4">
+        <div class="flex justify-between">
+          <span class="text-slate-500">ID операции:</span>
+          <span id="rcpt-id" class="text-slate-300 font-bold">#0000</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Время:</span>
+          <span id="rcpt-date" class="text-slate-300">01.01.2026</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Отправитель:</span>
+          <span id="rcpt-from" class="text-slate-200 font-bold">Игрок 1</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Получатель:</span>
+          <span id="rcpt-to" class="text-slate-200 font-bold">Игрок 2</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Комиссия банка:</span>
+          <span id="rcpt-fee" class="text-rose-400 font-bold">$0</span>
+        </div>
+        <div class="flex justify-between border-t border-slate-800 pt-2">
+          <span class="text-slate-400 font-bold">Сумма перевода:</span>
+          <span id="rcpt-amount" class="text-cher-400 font-bold text-sm">$0</span>
+        </div>
+        <div class="border-t border-slate-800 pt-2">
+          <div class="text-slate-500 text-[10px] uppercase">Назначение:</div>
+          <div id="rcpt-comment" class="text-slate-300 italic break-words mt-0.5">Оплата</div>
+        </div>
+      </div>
+
+      <button onclick="closeReceiptModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs transition">
+        Закрыть квитанцию
+      </button>
+    </div>
+  </div>
+
+
+  <!-- Модальное окно: Редактирование ссылки на RP биографию -->
+  <div id="admin-bio-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative">
+      <button onclick="closeAdminBioModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-cher-500/20 text-cher-400 flex items-center justify-center">
+          <i data-lucide="link" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Ссылка на RP Биографию</h3>
+          <p id="bio-modal-username" class="text-xs text-slate-400 font-mono">Игрок: </p>
+        </div>
+      </div>
+
+      <form onsubmit="handleSaveBioSubmit(event)" class="space-y-4">
+        <input type="hidden" id="bio-target-username">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+            URL ссылка (форум, Google Doc, Teletype и т.д.)
+          </label>
+          <input type="url" id="bio-url-input" placeholder="https://forum.rp-server.ru/..." 
+            class="w-full py-2.5 px-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-cher-400 font-mono">
+          <p class="text-[10px] text-slate-500 mt-1">Оставьте пустым, чтобы убрать биографию</p>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-cher-600 hover:bg-cher-500 text-white font-bold rounded-xl text-xs transition shadow">
+          Сохранить ссылку
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Модальное окно: Изменение баланса игрока -->
+  <div id="admin-balance-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative">
+      <button onclick="closeAdminBalanceModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+          <i data-lucide="wrench" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Корректировка счёта игрока</h3>
+          <p id="admin-modal-target-user" class="text-xs text-amber-400 font-mono">Счёт: </p>
+        </div>
+      </div>
+
+      <form onsubmit="handleAdminBalanceSubmit(event)" class="space-y-4">
+        <input type="hidden" id="admin-target-username">
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Тип операции</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="admin-action-type" value="add" checked class="peer sr-only">
+              <div class="py-2 text-center text-xs font-semibold rounded-xl bg-slate-950 border border-slate-800 text-slate-300 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-500 transition">
+                + Начислить
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="admin-action-type" value="deduct" class="peer sr-only">
+              <div class="py-2 text-center text-xs font-semibold rounded-xl bg-slate-950 border border-slate-800 text-slate-300 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-500 transition">
+                - Списать
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="admin-action-type" value="set" class="peer sr-only">
+              <div class="py-2 text-center text-xs font-semibold rounded-xl bg-slate-950 border border-slate-800 text-slate-300 peer-checked:bg-amber-600 peer-checked:text-white peer-checked:border-amber-500 transition">
+                = Задать
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Сумма в долларах ($)</label>
+          <input type="number" id="admin-modal-amount" min="1" step="1" required placeholder="0"
+            class="w-full py-2.5 px-3 bg-slate-950 border border-slate-800 rounded-xl text-lg font-bold font-mono text-white outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Причина операции</label>
+          <input type="text" id="admin-modal-reason" required placeholder="Например: Выплата фракции, изъятие средств"
+            class="w-full py-2.5 px-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-amber-500">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl shadow-lg transition text-sm">
+          Применить изменения
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Модальное окно: Подтверждение удаления аккаунта -->
+  <div id="delete-user-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-rose-800 rounded-3xl p-6 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center mb-3 border border-rose-500/30">
+        <i data-lucide="user-x" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white">Удалить аккаунт игрока?</h3>
+      <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+        Счёт игрока <span id="delete-user-target-name" class="font-bold text-white"></span> и все связанные данные будут безвозвратно стёрты.
+      </p>
+
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <button onclick="closeDeleteUserModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
+          Отмена
+        </button>
+        <button onclick="executeDeleteUser()" class="py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
+          Удалить
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Модальное окно: Сброс всей базы данных -->
+  <div id="reset-confirm-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-slate-900 border border-rose-800 rounded-3xl p-6 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 mx-auto flex items-center justify-center mb-3 border border-rose-500/30">
+        <i data-lucide="alert-octagon" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white">Очистить всю базу?</h3>
+      <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+        Все зарегистрированные игроки, вклады, кредиты и транзакции будут полностью сброшены.
+      </p>
+
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <button onclick="closeResetModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
+          Отмена
+        </button>
+        <button onclick="executeDatabaseReset()" class="py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition">
+          Очистить всё
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- ЛОГИКА И СЦЕНАРИИ БАНКА                    -->
+  <!-- ========================================== -->
+  <script>
+    const STORAGE_KEY_USERS = 'cherbank_users_v3';
+    const STORAGE_KEY_TX = 'cherbank_tx_v3';
+    const STORAGE_KEY_SETTINGS = 'cherbank_settings_v3';
+    const STORAGE_KEY_SESSION = 'cherbank_session_v3';
+
+    let currentHistoryFilter = 'all';
+    let userToDelete = null;
+
+    // Звуки Web Audio API
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (!audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.18);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(140, now + 0.15);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(800, now);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        }
+      } catch (e) {
+        console.error('Audio error:', e);
+      }
+    }
+
+    // Базовые настройки банка
+    const defaultSettings = {
+      transferFeePercent: 3,
+      loanRatePercent: 10,
+      loanMaxAmount: 50000,
+      loanMaxTermDays: 7,
+      loanPenaltyAmount: 1000,
+      depositRatePercent: 5,
+      depositTermDays: 3
+    };
+
+    function initDatabase() {
+      if (!localStorage.getItem(STORAGE_KEY_USERS)) {
+        localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify([]));
+      }
+      if (!localStorage.getItem(STORAGE_KEY_TX)) {
+        localStorage.setItem(STORAGE_KEY_TX, JSON.stringify([]));
+      }
+      if (!localStorage.getItem(STORAGE_KEY_SETTINGS)) {
+        localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(defaultSettings));
+      }
+    }
+
+    function getBankSettings() {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || '{}');
+      return { ...defaultSettings, ...stored };
+    }
+
+    function saveSettings(settings) {
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    }
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    }
+
+    function getTransactions() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_TX) || '[]');
+    }
+
+    function saveTransactions(txList) {
+      localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(txList));
+    }
+
+    function getCurrentUsername() {
+      return localStorage.getItem(STORAGE_KEY_SESSION);
+    }
+
+    function setCurrentUser(username) {
+      if (username) {
+        localStorage.setItem(STORAGE_KEY_SESSION, username);
+      } else {
+        localStorage.removeItem(STORAGE_KEY_SESSION);
+      }
+    }
+
+    function getCurrentUserData() {
+      const uName = getCurrentUsername();
+      if (!uName) return null;
+      const users = getUsers();
+      const user = users.find(u => u.username.toLowerCase() === uName.toLowerCase()) || null;
+      
+      // Проверка просроченного кредита и начисление штрафа
+      if (user && user.activeLoan && !user.activeLoan.penaltyApplied) {
+        const settings = getBankSettings();
+        const now = Date.now();
+        if (user.activeLoan.dueTimestamp && now > user.activeLoan.dueTimestamp) {
+          user.activeLoan.penaltyApplied = true;
+          user.activeLoan.isOverdue = true;
+          user.activeLoan.debt += (settings.loanPenaltyAmount || 0);
+
+          const txList = getTransactions();
+          txList.unshift({
+            id: 'PEN-' + Math.floor(1000 + Math.random() * 9000),
+            from: 'Черьбанк (Служба безопасности)',
+            to: user.username,
+            amount: settings.loanPenaltyAmount || 0,
+            fee: 0,
+            comment: `[ШТРАФ] Начислен штраф $${(settings.loanPenaltyAmount || 0).toLocaleString()} за просрочку кредита`,
+            date: new Date().toLocaleString('ru-RU')
+          });
+          saveTransactions(txList);
+          saveUsers(users);
+        }
+      }
+      return user;
+    }
+
+    function generateCardNumber() {
+      const p1 = '4276';
+      const p2 = Math.floor(1000 + Math.random() * 9000);
+      const p3 = Math.floor(1000 + Math.random() * 9000);
+      const p4 = Math.floor(1000 + Math.random() * 9000);
+      return `${p1} ${p2} ${p3} ${p4}`;
+    }
+
+    /* ------------------------------------------
+     * TOAST УВЕДОМЛЕНИЯ
+     * ------------------------------------------ */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let icon = 'info';
+      let border = 'border-slate-700';
+      let bg = 'bg-slate-900';
+      let text = 'text-slate-100';
+
+      if (type === 'success') {
+        icon = 'check-circle';
+        border = 'border-cher-500/60';
+        bg = 'bg-cher-950/95';
+        text = 'text-cher-200';
+      } else if (type === 'error') {
+        icon = 'alert-circle';
+        border = 'border-rose-500/60';
+        bg = 'bg-rose-950/95';
+        text = 'text-rose-200';
+      } else if (type === 'warning') {
+        icon = 'alert-triangle';
+        border = 'border-amber-500/60';
+        bg = 'bg-amber-950/95';
+        text = 'text-amber-200';
+      }
+
+      toast.className = `${bg} ${border} ${text} border p-4 rounded-2xl shadow-2xl flex items-center gap-3 text-xs sm:text-sm font-medium transform transition-all duration-300 pointer-events-auto translate-y-2 opacity-0`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i>
+        <div class="flex-1">${message}</div>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    /* ------------------------------------------
+     * ВХОД И РЕГИСТРАЦИЯ
+     * ------------------------------------------ */
+    function switchAuthTab(tab) {
+      playSound('click');
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const loginBtn = document.getElementById('tab-login-btn');
+      const regBtn = document.getElementById('tab-register-btn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        loginBtn.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-white bg-slate-800 shadow';
+        regBtn.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white';
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        regBtn.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-white bg-slate-800 shadow';
+        loginBtn.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white';
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const uInput = document.getElementById('login-username').value.trim();
+      const pInput = document.getElementById('login-password').value.trim();
+
+      const users = getUsers();
+      const user = users.find(u => u.username.toLowerCase() === uInput.toLowerCase());
+
+      if (!user) {
+        playSound('error');
+        showToast('Пользователь с таким никнеймом не найден', 'error');
+        return;
+      }
+
+      if (user.password !== pInput) {
+        playSound('error');
+        showToast('Неверный пароль', 'error');
+        return;
+      }
+
+      setCurrentUser(user.username);
+      playSound('success');
+      showToast(`Добро пожаловать в Черьбанк, ${user.username}!`, 'success');
+      renderApp();
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const uInput = document.getElementById('reg-username').value.trim();
+      const pInput = document.getElementById('reg-password').value.trim();
+
+      if (uInput.length < 2) {
+        showToast('Никнейм должен содержать минимум 2 символа', 'error');
+        return;
+      }
+
+      const users = getUsers();
+      const exists = users.some(u => u.username.toLowerCase() === uInput.toLowerCase());
+      if (exists) {
+        playSound('error');
+        showToast('Данный никнейм уже занят', 'error');
+        return;
+      }
+
+      // Если имя "Admin" или "admin" — это единственный способ получить права админа
+      const isAdminRole = uInput.toLowerCase() === 'admin';
+
+      const newUser = {
+        id: 'USR-' + Math.floor(1000 + Math.random() * 9000),
+        username: uInput,
+        password: pInput,
+        cardNumber: generateCardNumber(),
+        balance: isAdminRole ? 100000 : 1000,
+        isFrozen: false,
+        isAdmin: isAdminRole,
+        isVerified: isAdminRole,
+        hasCherPlus: isAdminRole,
+        cardSkin: isAdminRole ? 'gold' : 'default',
+        bioUrl: '',
+        activeLoan: null,
+        activeDeposit: null,
+        createdAt: new Date().toISOString()
+      };
+
+      users.push(newUser);
+      saveUsers(users);
+
+      setCurrentUser(newUser.username);
+      playSound('success');
+
+      if (isAdminRole) {
+        showToast('Создан аккаунт Администратора! Панель управления активирована.', 'warning');
+      } else {
+        showToast('Счёт успешно открыт! Стартовый баланс: $1,000.', 'success');
+      }
+
+      document.getElementById('reg-username').value = '';
+      document.getElementById('reg-password').value = '';
+
+      renderApp();
+    }
+
+    function handleLogout() {
+      setCurrentUser(null);
+      playSound('success');
+      showToast('Вы вышли из банковского клиента', 'info');
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * НАВИГАЦИЯ И СТРОГИЙ КОНТРОЛЬ ДОСТУПА
+     * ------------------------------------------ */
+    function setTab(tabName) {
+      const user = getCurrentUserData();
+      
+      // СТРОГИЙ КОНТРОЛЬ: если не админ пытается зайти на admin-панель
+      if (tabName === 'admin' && (!user || !user.isAdmin)) {
+        tabName = 'dashboard';
+      }
+
+      const tabs = ['dashboard', 'transfers', 'loans', 'deposits', 'plus', 'history', 'admin'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`tab-content-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (sec) sec.classList.add('hidden');
+        if (btn) {
+          btn.className = 'tab-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap text-slate-400 hover:text-white hover:bg-slate-800/60';
+        }
+      });
+
+      const activeSec = document.getElementById(`tab-content-${tabName}`);
+      const activeBtn = document.getElementById(`nav-${tabName}`);
+
+      if (activeSec) activeSec.classList.remove('hidden');
+      if (activeBtn) {
+        if (tabName === 'admin') {
+          activeBtn.className = 'tab-btn active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition whitespace-nowrap bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        } else {
+          activeBtn.className = 'tab-btn active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 transition whitespace-nowrap bg-cher-500/15 text-cher-300 border border-cher-500/30';
+        }
+      }
+
+      if (tabName === 'dashboard') renderDashboard();
+      if (tabName === 'loans') renderLoansTab();
+      if (tabName === 'deposits') renderDepositsTab();
+      if (tabName === 'plus') renderPlusTab();
+      if (tabName === 'history') renderHistory();
+      if (tabName === 'admin') renderAdmin();
+      
+      lucide.createIcons();
+    }
+
+    function renderApp() {
+      const user = getCurrentUserData();
+      const authScreen = document.getElementById('auth-screen');
+      const mainApp = document.getElementById('main-app');
+
+      if (!user) {
+        authScreen.classList.remove('hidden');
+        mainApp.classList.add('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      authScreen.classList.add('hidden');
+      mainApp.classList.remove('hidden');
+
+      // Шапка
+      document.getElementById('header-username').textContent = user.username;
+      document.getElementById('user-avatar-letter').textContent = user.username.charAt(0).toUpperCase();
+
+      const roleBadge = document.getElementById('header-role-badge');
+      const navAdmin = document.getElementById('nav-admin');
+      const verifiedIcon = document.getElementById('header-verified-icon');
+      const verifiedAvatarBadge = document.getElementById('verified-avatar-badge');
+      const plusBadge = document.getElementById('header-plus-badge');
+      const bioLink = document.getElementById('header-bio-link');
+
+      // Отображение галочки верификации
+      if (user.isVerified) {
+        verifiedIcon.classList.remove('hidden');
+        verifiedAvatarBadge.classList.remove('hidden');
+      } else {
+        verifiedIcon.classList.add('hidden');
+        verifiedAvatarBadge.classList.add('hidden');
+      }
+
+      // ЧерьПлюс
+      if (user.hasCherPlus) {
+        plusBadge.classList.remove('hidden');
+      } else {
+        plusBadge.classList.add('hidden');
+      }
+
+      // Биография
+      if (user.bioUrl && user.bioUrl.trim().length > 0) {
+        bioLink.href = user.bioUrl;
+        bioLink.classList.remove('hidden');
+      } else {
+        bioLink.classList.add('hidden');
+      }
+
+      // СТРОГОЕ ОТОБРАЖЕНИЕ КНОПКИ АДМИН-ПАНЕЛИ
+      if (user.isAdmin === true || user.username.toLowerCase() === 'admin') {
+        roleBadge.textContent = 'Администратор Банка';
+        roleBadge.className = 'text-[11px] text-amber-400 font-bold';
+        navAdmin.style.display = 'inline-flex'; // Показываем ТОЛЬКО админу
+      } else {
+        roleBadge.textContent = 'Клиент банка';
+        roleBadge.className = 'text-[11px] text-slate-400 font-semibold';
+        navAdmin.style.display = 'none'; // Скрываем абсолютно от всех
+      }
+
+      // Предупреждение о заморозке
+      const frozenBar = document.getElementById('frozen-warning-bar');
+      if (user.isFrozen) {
+        frozenBar.classList.remove('hidden');
+      } else {
+        frozenBar.classList.add('hidden');
+      }
+
+      setTab('dashboard');
+    }
+
+    /* ------------------------------------------
+     * ДАШБОРД
+     * ------------------------------------------ */
+    function renderDashboard() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+
+      // Настройка скина карты
+      const cardContainer = document.getElementById('bank-card-container');
+      cardContainer.className = `relative w-full aspect-[1.58/1] rounded-3xl p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-all duration-300 skin-${user.cardSkin || 'default'} text-white`;
+
+      document.getElementById('card-skin-badge').textContent = (user.cardSkin || 'default').toUpperCase();
+      document.getElementById('card-display-number').textContent = user.cardNumber;
+      document.getElementById('card-display-name').textContent = user.username;
+      document.getElementById('dash-bank-balance').textContent = `$${user.balance.toLocaleString()}`;
+
+      // Бейдж статуса карты
+      const statusEl = document.getElementById('card-status-text');
+      if (user.isFrozen) {
+        statusEl.textContent = 'ЗАМОРОЖЕН';
+        statusEl.className = 'font-mono text-xs font-bold text-rose-400';
+      } else {
+        statusEl.textContent = 'АКТИВЕН';
+        statusEl.className = 'font-mono text-xs font-bold text-emerald-400';
+      }
+
+      // ЧерьПлюс на карте
+      const cardPlusPill = document.getElementById('card-plus-pill');
+      if (user.hasCherPlus) {
+        cardPlusPill.classList.remove('hidden');
+      } else {
+        cardPlusPill.classList.add('hidden');
+      }
+
+      // Комиссия на дашборде
+      const feeRateText = user.hasCherPlus ? '0% (ЧерьПлюс)' : `${settings.transferFeePercent}%`;
+      document.getElementById('dash-fee-rate').textContent = feeRateText;
+
+      // Депозит инфо
+      const depBadge = document.getElementById('dash-deposit-badge');
+      if (user.activeDeposit) {
+        depBadge.classList.remove('hidden');
+        document.getElementById('dash-deposit-val').textContent = `$${user.activeDeposit.amount.toLocaleString()}`;
+      } else {
+        depBadge.classList.add('hidden');
+      }
+
+      // Кредит инфо
+      const loanBadge = document.getElementById('dash-loan-badge');
+      if (user.activeLoan) {
+        loanBadge.classList.remove('hidden');
+        document.getElementById('dash-loan-val').textContent = `$${user.activeLoan.debt.toLocaleString()}`;
+      } else {
+        loanBadge.classList.add('hidden');
+      }
+
+      // Список последних операций
+      const txList = getTransactions().filter(t => 
+        t.from.toLowerCase() === user.username.toLowerCase() || 
+        t.to.toLowerCase() === user.username.toLowerCase()
+      );
+
+      const recentContainer = document.getElementById('dash-recent-list');
+      if (txList.length === 0) {
+        recentContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Транзакций по счёту пока нет.</div>`;
+        return;
+      }
+
+      recentContainer.innerHTML = txList.slice(0, 4).map(tx => {
+        const isIncoming = tx.to.toLowerCase() === user.username.toLowerCase();
+        const sign = isIncoming ? '+' : '-';
+        const colorClass = isIncoming ? 'text-emerald-400' : 'text-slate-200';
+        const icon = isIncoming ? 'arrow-down-left' : 'arrow-up-right';
+        const iconBg = isIncoming ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400';
+        const otherParty = isIncoming ? `От: ${tx.from}` : `Кому: ${tx.to}`;
+
+        return `
+          <div class="p-3 bg-slate-950/70 border border-slate-800/80 rounded-2xl flex items-center justify-between gap-3 hover:border-slate-700 transition">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0">
+                <i data-lucide="${icon}" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-white">${otherParty}</div>
+                <div class="text-[11px] text-slate-400 truncate max-w-[200px] sm:max-w-xs">${tx.comment}</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-bold font-mono ${colorClass}">${sign}$${tx.amount.toLocaleString()}</div>
+              <div class="text-[10px] text-slate-500">${tx.date.split(',')[0]}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function copyCardNumber() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const el = document.createElement('textarea');
+      el.value = user.cardNumber;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('Номер счёта скопирован в буфер', 'success');
+      playSound('success');
+    }
+
+    /* ------------------------------------------
+     * ПЕРЕВОДЫ С КОМИССИЕЙ
+     * ------------------------------------------ */
+    function setTransferMax() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+      if (user.hasCherPlus) {
+        document.getElementById('transfer-amount').value = user.balance;
+      } else {
+        const feeMultiplier = 1 + (settings.transferFeePercent / 100);
+        const maxCanSend = Math.floor(user.balance / feeMultiplier);
+        document.getElementById('transfer-amount').value = Math.max(0, maxCanSend);
+      }
+      updateTransferFeeCalculation();
+    }
+
+    function updateTransferFeeCalculation() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+      const amount = parseInt(document.getElementById('transfer-amount').value) || 0;
+      
+      const perkBox = document.getElementById('transfer-plus-perk');
+      const feeRateText = document.getElementById('transfer-fee-rate-text');
+      const feeAmountText = document.getElementById('transfer-fee-amount-text');
+      const totalAmountText = document.getElementById('transfer-total-amount-text');
+
+      if (user.hasCherPlus) {
+        perkBox.classList.remove('hidden');
+        feeRateText.textContent = '0% (ЧерьПлюс)';
+        feeAmountText.textContent = '$0';
+        totalAmountText.textContent = `$${amount.toLocaleString()}`;
+      } else {
+        perkBox.classList.add('hidden');
+        const fee = Math.round(amount * (settings.transferFeePercent / 100));
+        feeRateText.textContent = `${settings.transferFeePercent}%`;
+        feeAmountText.textContent = `$${fee.toLocaleString()}`;
+        totalAmountText.textContent = `$${(amount + fee).toLocaleString()}`;
+      }
+    }
+
+    function handleTransferSubmit(e) {
+      e.preventDefault();
+      const currentUser = getCurrentUserData();
+      if (!currentUser) return;
+      const settings = getBankSettings();
+
+      if (currentUser.isFrozen) {
+        playSound('error');
+        showToast('Операция отклонена: ваш счёт заморожен банком', 'error');
+        return;
+      }
+
+      const recipientQuery = document.getElementById('transfer-recipient').value.trim();
+      const amount = parseInt(document.getElementById('transfer-amount').value);
+      const comment = document.getElementById('transfer-comment').value.trim();
+
+      if (!amount || amount <= 0) {
+        showToast('Укажите корректную сумму перевода', 'error');
+        return;
+      }
+
+      const fee = currentUser.hasCherPlus ? 0 : Math.round(amount * (settings.transferFeePercent / 100));
+      const totalToDeduct = amount + fee;
+
+      if (currentUser.balance < totalToDeduct) {
+        playSound('error');
+        showToast(`Недостаточно средств. С учетом комиссии требуется $${totalToDeduct.toLocaleString()}`, 'error');
+        return;
+      }
+
+      const users = getUsers();
+      const recipient = users.find(u => 
+        u.username.toLowerCase() === recipientQuery.toLowerCase() ||
+        u.cardNumber.replace(/\s+/g, '') === recipientQuery.replace(/\s+/g, '')
+      );
+
+      if (!recipient) {
+        playSound('error');
+        showToast('Получатель с таким никнеймом или счётом не найден', 'error');
+        return;
+      }
+
+      if (recipient.username.toLowerCase() === currentUser.username.toLowerCase()) {
+        showToast('Нельзя перевести средства самому себе', 'warning');
+        return;
+      }
+
+      // Проведение перевода
+      currentUser.balance -= totalToDeduct;
+      recipient.balance += amount;
+
+      const updatedUsers = users.map(u => {
+        if (u.username === currentUser.username) return currentUser;
+        if (u.username === recipient.username) return recipient;
+        return u;
+      });
+      saveUsers(updatedUsers);
+
+      const txObj = {
+        id: 'TX-' + Math.floor(1000 + Math.random() * 9000),
+        from: currentUser.username,
+        to: recipient.username,
+        amount: amount,
+        fee: fee,
+        comment: comment,
+        date: new Date().toLocaleString('ru-RU')
+      };
+
+      const txList = getTransactions();
+      txList.unshift(txObj);
+      saveTransactions(txList);
+
+      playSound('success');
+      showToast(`Перевод $${amount.toLocaleString()} отправлен!`, 'success');
+
+      document.getElementById('transfer-recipient').value = '';
+      document.getElementById('transfer-amount').value = '';
+      document.getElementById('transfer-comment').value = '';
+      updateTransferFeeCalculation();
+
+      openReceiptModal(txObj);
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * ЧЕРЬКРЕДИТ С ПОЛЗУНКАМИ И ШТРАФАМИ
+     * ------------------------------------------ */
+    function renderLoansTab() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+
+      document.getElementById('loan-card-rate').textContent = `${settings.loanRatePercent}%`;
+      document.getElementById('loan-card-max').textContent = `$${settings.loanMaxAmount.toLocaleString()}`;
+      document.getElementById('loan-card-days').textContent = `${settings.loanMaxTermDays} дн.`;
+      document.getElementById('loan-card-penalty').textContent = `$${settings.loanPenaltyAmount.toLocaleString()}`;
+
+      const activeBox = document.getElementById('loan-active-container');
+      const reqBox = document.getElementById('loan-request-container');
+
+      if (user.activeLoan) {
+        activeBox.classList.remove('hidden');
+        reqBox.classList.add('hidden');
+
+        document.getElementById('loan-debt-val').textContent = `$${user.activeLoan.debt.toLocaleString()}`;
+        document.getElementById('loan-principal-val').textContent = `$${user.activeLoan.principal.toLocaleString()}`;
+        document.getElementById('loan-rate-val').textContent = `${user.activeLoan.rate}%`;
+        document.getElementById('loan-term-val').textContent = `${user.activeLoan.termDays} дн.`;
+
+        const statusTag = document.getElementById('loan-status-tag');
+        const overdueBanner = document.getElementById('loan-overdue-banner');
+        if (user.activeLoan.isOverdue) {
+          statusTag.textContent = 'ПРОСРОЧЕНО';
+          statusTag.className = 'text-xs font-mono bg-rose-600 text-white font-bold px-2.5 py-1 rounded-full animate-pulse';
+          overdueBanner.classList.remove('hidden');
+        } else {
+          statusTag.textContent = 'АКТИВЕН';
+          statusTag.className = 'text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2.5 py-1 rounded-full';
+          overdueBanner.classList.add('hidden');
+        }
+      } else {
+        activeBox.classList.add('hidden');
+        reqBox.classList.remove('hidden');
+
+        // Конфигурация слайдеров
+        const amountSlider = document.getElementById('loan-amount-slider');
+        const termSlider = document.getElementById('loan-term-slider');
+
+        amountSlider.max = Math.max(1000, settings.loanMaxAmount);
+        if (parseInt(amountSlider.value) > settings.loanMaxAmount) {
+          amountSlider.value = settings.loanMaxAmount;
+        }
+        document.getElementById('loan-slider-max-label').textContent = `Макс: $${settings.loanMaxAmount.toLocaleString()}`;
+
+        termSlider.max = Math.max(3, settings.loanMaxTermDays);
+        if (parseInt(termSlider.value) > settings.loanMaxTermDays) {
+          termSlider.value = settings.loanMaxTermDays;
+        }
+        document.getElementById('loan-term-max-label').textContent = `Макс: ${settings.loanMaxTermDays} дн.`;
+
+        onLoanSlidersChange();
+      }
+    }
+
+    function onLoanSlidersChange() {
+      const amountSlider = document.getElementById('loan-amount-slider');
+      const termSlider = document.getElementById('loan-term-slider');
+      if (!amountSlider || !termSlider) return;
+
+      const amount = parseInt(amountSlider.value) || 1000;
+      const term = parseInt(termSlider.value) || 3;
+
+      document.getElementById('loan-amount-display').textContent = `$${amount.toLocaleString()}`;
+      document.getElementById('loan-term-display').textContent = `${term} ${term === 1 ? 'день' : term < 5 ? 'дня' : 'дней'}`;
+
+      const settings = getBankSettings();
+      const interest = Math.round(amount * (settings.loanRatePercent / 100));
+      document.getElementById('loan-preview-interest').textContent = `+$${interest.toLocaleString()}`;
+      document.getElementById('loan-preview-total').textContent = `$${(amount + interest).toLocaleString()}`;
+    }
+
+    function handleLoanRequest(e) {
+      e.preventDefault();
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+
+      if (user.isFrozen) {
+        showToast('Ваш счёт заморожен, кредитование недоступно', 'error');
+        return;
+      }
+
+      if (user.activeLoan) {
+        showToast('У вас уже есть непогашенный кредит!', 'warning');
+        return;
+      }
+
+      const amount = parseInt(document.getElementById('loan-amount-slider').value) || 1000;
+      const termDays = parseInt(document.getElementById('loan-term-slider').value) || 3;
+
+      if (amount <= 0 || amount > settings.loanMaxAmount) {
+        showToast(`Сумма кредита не может превышать лимит $${settings.loanMaxAmount.toLocaleString()}`, 'error');
+        return;
+      }
+
+      const interest = Math.round(amount * (settings.loanRatePercent / 100));
+      const totalDebt = amount + interest;
+
+      user.balance += amount;
+      user.activeLoan = {
+        id: 'LN-' + Math.floor(1000 + Math.random() * 9000),
+        principal: amount,
+        debt: totalDebt,
+        rate: settings.loanRatePercent,
+        termDays: termDays,
+        takenAt: new Date().toLocaleDateString('ru-RU'),
+        takenTimestamp: Date.now(),
+        dueTimestamp: Date.now() + (termDays * 24 * 60 * 60 * 1000),
+        penaltyApplied: false,
+        isOverdue: false
+      };
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      const txList = getTransactions();
+      txList.unshift({
+        id: 'CR-' + Math.floor(1000 + Math.random() * 9000),
+        from: 'Черьбанк (Кредитный отдел)',
+        to: user.username,
+        amount: amount,
+        fee: 0,
+        comment: `[ЧерьКредит] Займ $${amount.toLocaleString()} на ${termDays} дн.`,
+        date: new Date().toLocaleString('ru-RU')
+      });
+      saveTransactions(txList);
+
+      playSound('success');
+      showToast(`Кредит на $${amount.toLocaleString()} выдан и зачислен на баланс!`, 'success');
+      renderApp();
+    }
+
+    function handleRepayLoan(isFull) {
+      const user = getCurrentUserData();
+      if (!user || !user.activeLoan) return;
+
+      let payAmount = isFull ? user.activeLoan.debt : parseInt(document.getElementById('loan-repay-amount').value);
+      if (!payAmount || payAmount <= 0) {
+        showToast('Укажите сумму для платежа', 'error');
+        return;
+      }
+
+      if (payAmount > user.activeLoan.debt) {
+        payAmount = user.activeLoan.debt;
+      }
+
+      if (user.balance < payAmount) {
+        playSound('error');
+        showToast(`Недостаточно средств. Ваш баланс: $${user.balance.toLocaleString()}`, 'error');
+        return;
+      }
+
+      user.balance -= payAmount;
+      user.activeLoan.debt -= payAmount;
+
+      if (user.activeLoan.debt <= 0) {
+        user.activeLoan = null;
+        showToast('Поздравляем! Кредит полностью погашен!', 'success');
+      } else {
+        showToast(`Внесено $${payAmount.toLocaleString()} в счет погашения кредита`, 'success');
+      }
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      const txList = getTransactions();
+      txList.unshift({
+        id: 'RP-' + Math.floor(1000 + Math.random() * 9000),
+        from: user.username,
+        to: 'Черьбанк (Кредитный отдел)',
+        amount: payAmount,
+        fee: 0,
+        comment: `[Погашение кредита] Внесен платёж $${payAmount.toLocaleString()}`,
+        date: new Date().toLocaleString('ru-RU')
+      });
+      saveTransactions(txList);
+
+      playSound('success');
+      document.getElementById('loan-repay-amount').value = '';
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * ЧЕРЬВКЛАД С ТАЙМЕРОМ ОЖИДАНИЯ
+     * ------------------------------------------ */
+    function renderDepositsTab() {
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+
+      document.getElementById('deposit-stat-rate').textContent = `${settings.depositRatePercent}%`;
+      document.getElementById('deposit-stat-days').textContent = `${settings.depositTermDays} ${settings.depositTermDays === 1 ? 'день' : settings.depositTermDays < 5 ? 'дня' : 'дней'}`;
+
+      const activeBox = document.getElementById('deposit-active-container');
+      const createBox = document.getElementById('deposit-create-container');
+
+      if (user.activeDeposit) {
+        activeBox.classList.remove('hidden');
+        createBox.classList.add('hidden');
+
+        document.getElementById('deposit-body-val').textContent = `$${user.activeDeposit.amount.toLocaleString()}`;
+        document.getElementById('deposit-profit-val').textContent = `+$${user.activeDeposit.accumulatedProfit.toLocaleString()}`;
+        document.getElementById('deposit-rate-val').textContent = `${user.activeDeposit.rate}%`;
+
+        // Проверка готовности процентов
+        const now = Date.now();
+        const availableAt = user.activeDeposit.claimAvailableTimestamp || 0;
+        const isReady = now >= availableAt;
+
+        const collectBtn = document.getElementById('btn-collect-deposit-profit');
+        const lockText = document.getElementById('deposit-lock-text');
+        const lockBadge = document.getElementById('deposit-lock-badge');
+
+        if (isReady) {
+          collectBtn.disabled = false;
+          lockText.textContent = 'Прибыль готова к выплате на банковскую карту!';
+          lockText.className = 'text-emerald-400 font-mono font-bold';
+          lockBadge.textContent = 'ДОСТУПНО';
+          lockBadge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        } else {
+          collectBtn.disabled = true;
+          const diffMs = availableAt - now;
+          const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+          const hours = Math.floor((diffMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+          const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+          const timeStr = days > 0 ? `${days} дн. ${hours} ч.` : `${hours} ч. ${mins} мин.`;
+          lockText.textContent = `До начисления процентов осталось: ${timeStr}`;
+          lockText.className = 'text-slate-300 font-mono';
+          lockBadge.textContent = 'В ОЖИДАНИИ';
+          lockBadge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/30';
+        }
+      } else {
+        activeBox.classList.add('hidden');
+        createBox.classList.remove('hidden');
+      }
+    }
+
+    function handleCreateDeposit(e) {
+      e.preventDefault();
+      const user = getCurrentUserData();
+      if (!user) return;
+      const settings = getBankSettings();
+
+      if (user.isFrozen) {
+        showToast('Ваш счёт заморожен, открытие вкладов недоступно', 'error');
+        return;
+      }
+
+      const amount = parseInt(document.getElementById('deposit-amount-input').value);
+      if (amount <= 0) {
+        showToast('Укажите корректную сумму вклада', 'error');
+        return;
+      }
+
+      if (user.balance < amount) {
+        playSound('error');
+        showToast('Недостаточно средств на банковской карте', 'error');
+        return;
+      }
+
+      user.balance -= amount;
+      user.activeDeposit = {
+        id: 'DEP-' + Math.floor(1000 + Math.random() * 9000),
+        amount: amount,
+        rate: settings.depositRatePercent,
+        termDays: settings.depositTermDays,
+        openedAt: new Date().toLocaleDateString('ru-RU'),
+        openedTimestamp: Date.now(),
+        claimAvailableTimestamp: Date.now() + (settings.depositTermDays * 24 * 60 * 60 * 1000),
+        accumulatedProfit: Math.round(amount * (settings.depositRatePercent / 100))
+      };
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      const txList = getTransactions();
+      txList.unshift({
+        id: 'DP-' + Math.floor(1000 + Math.random() * 9000),
+        from: user.username,
+        to: 'Черьбанк (Депозитарий)',
+        amount: amount,
+        fee: 0,
+        comment: `[ЧерьВклад] Открытие вклада под ${settings.depositRatePercent}% на ${settings.depositTermDays} дн.`,
+        date: new Date().toLocaleString('ru-RU')
+      });
+      saveTransactions(txList);
+
+      playSound('success');
+      showToast(`Вклад на $${amount.toLocaleString()} успешно открыт!`, 'success');
+      renderApp();
+    }
+
+    function handleCollectDepositProfit() {
+      const user = getCurrentUserData();
+      if (!user || !user.activeDeposit) return;
+
+      const now = Date.now();
+      if (now < (user.activeDeposit.claimAvailableTimestamp || 0)) {
+        playSound('error');
+        showToast('Срок выплаты процентов ещё не наступил!', 'error');
+        return;
+      }
+
+      const profit = user.activeDeposit.accumulatedProfit;
+      user.balance += profit;
+
+      // Устанавливаем следующий цикл выплаты
+      const settings = getBankSettings();
+      user.activeDeposit.claimAvailableTimestamp = Date.now() + (user.activeDeposit.termDays * 24 * 60 * 60 * 1000);
+      user.activeDeposit.accumulatedProfit = Math.round(user.activeDeposit.amount * (settings.depositRatePercent / 100));
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      const txList = getTransactions();
+      txList.unshift({
+        id: 'INC-' + Math.floor(1000 + Math.random() * 9000),
+        from: 'Черьбанк (Депозитарий)',
+        to: user.username,
+        amount: profit,
+        fee: 0,
+        comment: `[Выплата по вкладу] Начислены проценты +$${profit.toLocaleString()}`,
+        date: new Date().toLocaleString('ru-RU')
+      });
+      saveTransactions(txList);
+
+      playSound('success');
+      showToast(`Прибыль $${profit.toLocaleString()} начислена на карту! Следующая выплата через ${user.activeDeposit.termDays} дн.`, 'success');
+      renderApp();
+    }
+
+    function handleCloseDeposit() {
+      const user = getCurrentUserData();
+      if (!user || !user.activeDeposit) return;
+
+      const totalReturn = user.activeDeposit.amount + user.activeDeposit.accumulatedProfit;
+      user.balance += totalReturn;
+      user.activeDeposit = null;
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      playSound('success');
+      showToast(`Вклад закрыт. Все средства ($${totalReturn.toLocaleString()}) возвращены на карту!`, 'success');
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * ЧЕРЬПЛЮС И СТИЛИ КАРТЫ
+     * ------------------------------------------ */
+    function renderPlusTab() {
+      const user = getCurrentUserData();
+      if (!user) return;
+
+      const pill = document.getElementById('plus-status-pill');
+      const buyBtn = document.getElementById('btn-buy-plus');
+
+      if (user.hasCherPlus) {
+        pill.textContent = 'АКТИВНА';
+        pill.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        buyBtn.classList.add('hidden');
+      } else {
+        pill.textContent = 'НЕ АКТИВНА';
+        pill.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+        buyBtn.classList.remove('hidden');
+      }
+
+      // Подсветка выбранного скина
+      const skins = ['default', 'gold', 'cyber', 'emerald', 'carbon'];
+      skins.forEach(s => {
+        const icon = document.getElementById(`skin-check-${s}`);
+        if (icon) {
+          if ((user.cardSkin || 'default') === s) {
+            icon.classList.remove('hidden');
+          } else {
+            icon.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    function handleBuyCherPlus() {
+      const user = getCurrentUserData();
+      if (!user) return;
+
+      if (user.hasCherPlus) {
+        showToast('У вас уже оформлена подписка ЧерьПлюс', 'info');
+        return;
+      }
+
+      if (user.balance < 500) {
+        playSound('error');
+        showToast(`Недостаточно средств ($500). Ваш баланс: $${user.balance.toLocaleString()}`, 'error');
+        return;
+      }
+
+      user.balance -= 500;
+      user.hasCherPlus = true;
+
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      const txList = getTransactions();
+      txList.unshift({
+        id: 'PLS-' + Math.floor(1000 + Math.random() * 9000),
+        from: user.username,
+        to: 'Черьбанк (Премиум сервис)',
+        amount: 500,
+        fee: 0,
+        comment: 'Активация премиум-подписки «ЧерьПлюс»',
+        date: new Date().toLocaleString('ru-RU')
+      });
+      saveTransactions(txList);
+
+      playSound('success');
+      showToast('Подписка «ЧерьПлюс» активирована! Доступна кастомизация и 0% комиссия.', 'success');
+      renderApp();
+    }
+
+    function selectCardSkin(skinName) {
+      const user = getCurrentUserData();
+      if (!user) return;
+
+      if (!user.hasCherPlus && skinName !== 'default') {
+        playSound('error');
+        showToast('Кастомизация карт доступна только подписчикам ЧерьПлюс!', 'warning');
+        return;
+      }
+
+      user.cardSkin = skinName;
+      const users = getUsers();
+      const updated = users.map(u => u.username === user.username ? user : u);
+      saveUsers(updated);
+
+      playSound('success');
+      showToast(`Выбрано оформление: ${skinName.toUpperCase()}`, 'success');
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * ИСТОРИЯ ОПЕРАЦИЙ
+     * ------------------------------------------ */
+    function setHistoryFilter(filter) {
+      currentHistoryFilter = filter;
+      const filters = ['all', 'in', 'out'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`filter-${f}`);
+        if (f === filter) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-cher-500/20 text-cher-300 border border-cher-500/30';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-950 text-slate-400 border border-slate-800 hover:text-white';
+        }
+      });
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const user = getCurrentUserData();
+      if (!user) return;
+
+      const txList = getTransactions().filter(t => 
+        t.from.toLowerCase() === user.username.toLowerCase() || 
+        t.to.toLowerCase() === user.username.toLowerCase()
+      );
+
+      const filtered = txList.filter(t => {
+        const isIncoming = t.to.toLowerCase() === user.username.toLowerCase();
+        if (currentHistoryFilter === 'in') return isIncoming;
+        if (currentHistoryFilter === 'out') return !isIncoming;
+        return true;
+      });
+
+      const container = document.getElementById('full-history-list');
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-sm">Нет операций по выбранному критерию.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(tx => {
+        const isIncoming = tx.to.toLowerCase() === user.username.toLowerCase();
+        const sign = isIncoming ? '+' : '-';
+        const colorClass = isIncoming ? 'text-emerald-400' : 'text-rose-400';
+        const icon = isIncoming ? 'arrow-down-left' : 'arrow-up-right';
+        const iconBg = isIncoming ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400';
+        const title = isIncoming ? `Поступление от ${tx.from}` : `Перевод для ${tx.to}`;
+
+        return `
+          <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-700 transition">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0">
+                <i data-lucide="${icon}" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-white">${title}</div>
+                <div class="text-xs text-slate-400 italic">${tx.comment}</div>
+                <div class="text-[10px] text-slate-500 font-mono mt-0.5">${tx.date} • ID: ${tx.id} ${tx.fee ? `• Комиссия: $${tx.fee}` : ''}</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-0 pt-2 sm:pt-0 border-slate-800/80">
+              <div class="text-base font-extrabold font-mono ${colorClass}">${sign}$${tx.amount.toLocaleString()}</div>
+              <button onclick='viewReceiptById("${tx.id}")' class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                <span>Чек</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openReceiptModal(tx) {
+      document.getElementById('rcpt-id').textContent = tx.id;
+      document.getElementById('rcpt-date').textContent = tx.date;
+      document.getElementById('rcpt-from').textContent = tx.from;
+      document.getElementById('rcpt-to').textContent = tx.to;
+      document.getElementById('rcpt-amount').textContent = `$${tx.amount.toLocaleString()}`;
+      document.getElementById('rcpt-fee').textContent = `$${(tx.fee || 0).toLocaleString()}`;
+      document.getElementById('rcpt-comment').textContent = tx.comment;
+      document.getElementById('receipt-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function viewReceiptById(id) {
+      const tx = getTransactions().find(t => t.id === id);
+      if (tx) openReceiptModal(tx);
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    /* ------------------------------------------
+     * ПАНЕЛЬ УПРАВЛЕНИЯ (ТОЛЬКО ДЛЯ ROLE: ADMIN)
+     * ------------------------------------------ */
+    function renderAdmin() {
+      const user = getCurrentUserData();
+      if (!user || !user.isAdmin) return;
+
+      const settings = getBankSettings();
+      document.getElementById('setting-transfer-fee').value = settings.transferFeePercent;
+      document.getElementById('setting-loan-rate').value = settings.loanRatePercent;
+      document.getElementById('setting-loan-max').value = settings.loanMaxAmount;
+      document.getElementById('setting-loan-days').value = settings.loanMaxTermDays;
+      document.getElementById('setting-loan-penalty').value = settings.loanPenaltyAmount;
+      document.getElementById('setting-deposit-rate').value = settings.depositRatePercent;
+      document.getElementById('setting-deposit-days').value = settings.depositTermDays;
+
+      renderAdminUsersTable();
+      renderAdminAuditTable();
+    }
+
+    function saveBankSettings() {
+      const newSettings = {
+        transferFeePercent: parseInt(document.getElementById('setting-transfer-fee').value) || 0,
+        loanRatePercent: parseInt(document.getElementById('setting-loan-rate').value) || 0,
+        loanMaxAmount: parseInt(document.getElementById('setting-loan-max').value) || 10000,
+        loanMaxTermDays: parseInt(document.getElementById('setting-loan-days').value) || 7,
+        loanPenaltyAmount: parseInt(document.getElementById('setting-loan-penalty').value) || 0,
+        depositRatePercent: parseInt(document.getElementById('setting-deposit-rate').value) || 5,
+        depositTermDays: parseInt(document.getElementById('setting-deposit-days').value) || 3
+      };
+
+      saveSettings(newSettings);
+      playSound('success');
+      showToast('Глобальные параметры банка успешно обновлены!', 'success');
+      renderApp();
+    }
+
+    function renderAdminUsersTable() {
+      const users = getUsers();
+      const query = (document.getElementById('admin-search-input').value || '').toLowerCase();
+
+      const filtered = users.filter(u => 
+        u.username.toLowerCase().includes(query) || 
+        u.cardNumber.toLowerCase().includes(query)
+      );
+
+      const tbody = document.getElementById('admin-users-tbody');
+      tbody.innerHTML = filtered.map(u => {
+        const isFrozen = u.isFrozen;
+        const freezeBtnText = isFrozen ? 'Разморозить' : 'Заморозить';
+        const freezeBtnColor = isFrozen ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800' : 'bg-slate-800 text-slate-300 border-slate-700';
+
+        const verifiedBadge = u.isVerified 
+          ? `<button onclick="toggleUserVerified('${u.username}')" class="px-2 py-1 bg-cher-500/20 text-cher-300 border border-cher-500/40 rounded-lg flex items-center gap-1 text-[11px] font-sans font-semibold" title="Снять верификацию">
+               <i data-lucide="check-circle" class="w-3.5 h-3.5 text-cher-400"></i>
+               <span>Верифицирован</span>
+             </button>`
+          : `<button onclick="toggleUserVerified('${u.username}')" class="px-2 py-1 bg-slate-950 text-slate-500 border border-slate-800 hover:text-white rounded-lg flex items-center gap-1 text-[11px] font-sans" title="Выдать галочку и ЧерьПлюс">
+               <i data-lucide="circle" class="w-3.5 h-3.5"></i>
+               <span>Выдать</span>
+             </button>`;
+
+        const bioBtn = u.bioUrl && u.bioUrl.trim().length > 0
+          ? `<button onclick="openAdminBioModal('${u.username}')" class="px-2 py-1 bg-cher-950/60 text-cher-300 border border-cher-800 rounded-lg text-[11px] font-sans flex items-center gap-1 hover:underline">
+               <i data-lucide="link" class="w-3 h-3"></i>
+               <span>Есть bio</span>
+             </button>`
+          : `<button onclick="openAdminBioModal('${u.username}')" class="px-2 py-1 bg-slate-950 text-slate-500 border border-slate-800 hover:text-white rounded-lg text-[11px] font-sans">
+               + Добавить bio
+             </button>`;
+
+        const isSuperAdmin = u.username.toLowerCase() === 'admin';
+
+        return `
+          <tr class="hover:bg-slate-950/40 transition">
+            <td class="py-3 px-3 font-bold text-white">
+              <div class="flex items-center gap-1.5">
+                <span>${u.username}</span>
+                ${u.isAdmin ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1 py-0.2 rounded font-sans">ADMIN</span>' : ''}
+                ${u.hasCherPlus ? '<span class="text-[9px] bg-amber-500/30 text-amber-300 px-1 py-0.2 rounded font-sans">PLUS</span>' : ''}
+              </div>
+            </td>
+            <td class="py-3 px-3 text-slate-400">${u.cardNumber}</td>
+            <td class="py-3 px-3 text-cher-400 font-bold">$${u.balance.toLocaleString()}</td>
+            <td class="py-3 px-3">${bioBtn}</td>
+            <td class="py-3 px-3">${verifiedBadge}</td>
+            <td class="py-3 px-3 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openAdminBalanceModal('${u.username}')" class="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-lg text-[11px] font-sans font-semibold transition">
+                  Баланс
+                </button>
+                <button onclick="toggleUserFreeze('${u.username}')" class="px-2.5 py-1 ${freezeBtnColor} border rounded-lg text-[11px] font-sans transition">
+                  ${freezeBtnText}
+                </button>
+                ${!isSuperAdmin ? `
+                  <button onclick="confirmDeleteUser('${u.username}')" class="p-1 bg-rose-950/50 hover:bg-rose-900 border border-rose-800 text-rose-400 rounded-lg transition" title="Удалить аккаунт">
+                    <i data-lucide="trash" class="w-4 h-4"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderAdminAuditTable() {
+      const txList = getTransactions();
+      const tbody = document.getElementById('admin-audit-tbody');
+
+      if (txList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-500">Операций пока нет</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = txList.map(tx => {
+        return `
+          <tr class="hover:bg-slate-950/40 transition">
+            <td class="py-2.5 px-3 text-slate-500 text-[10px]">${tx.date}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-300">${tx.from}</td>
+            <td class="py-2.5 px-3 font-semibold text-cher-300">${tx.to}</td>
+            <td class="py-2.5 px-3 font-bold text-cher-400">$${tx.amount.toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-rose-400">$${(tx.fee || 0).toLocaleString()}</td>
+            <td class="py-2.5 px-3 text-slate-400 italic">${tx.comment}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Выдача/снятие верификации и автоматическая привязка ЧерьПлюс
+    function toggleUserVerified(targetUsername) {
+      const users = getUsers();
+      const user = users.find(u => u.username === targetUsername);
+      if (!user) return;
+
+      user.isVerified = !user.isVerified;
+      if (user.isVerified) {
+        // При выдаче галочки ЧерьПлюс выдается автоматически!
+        user.hasCherPlus = true;
+        showToast(`Галочка верификации выдана! Подписка «ЧерьПлюс» активирована.`, 'success');
+      } else {
+        showToast(`Верификация снята для пользователя ${user.username}`, 'info');
+      }
+
+      saveUsers(users);
+      playSound('success');
+      renderAdmin();
+      renderApp();
+    }
+
+    // Редактирование RP Биографии
+    function openAdminBioModal(username) {
+      const users = getUsers();
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+
+      document.getElementById('bio-target-username').value = username;
+      document.getElementById('bio-modal-username').textContent = `Игрок: ${username}`;
+      document.getElementById('bio-url-input').value = user.bioUrl || '';
+      document.getElementById('admin-bio-modal').classList.remove('hidden');
+    }
+
+    function closeAdminBioModal() {
+      document.getElementById('admin-bio-modal').classList.add('hidden');
+    }
+
+    function handleSaveBioSubmit(e) {
+      e.preventDefault();
+      const targetUsername = document.getElementById('bio-target-username').value;
+      const url = document.getElementById('bio-url-input').value.trim();
+
+      const users = getUsers();
+      const user = users.find(u => u.username === targetUsername);
+      if (!user) return;
+
+      user.bioUrl = url;
+      saveUsers(users);
+
+      closeAdminBioModal();
+      playSound('success');
+      showToast(`Ссылка на био для ${user.username} сохранена`, 'success');
+      renderAdmin();
+      renderApp();
+    }
+
+    // Заморозка
+    function toggleUserFreeze(targetUsername) {
+      const users = getUsers();
+      const user = users.find(u => u.username === targetUsername);
+      if (!user) return;
+
+      user.isFrozen = !user.isFrozen;
+      saveUsers(users);
+
+      const statusText = user.isFrozen ? 'заморожен' : 'разморожен';
+      showToast(`Счёт ${user.username} ${statusText}`, user.isFrozen ? 'warning' : 'success');
+      playSound('success');
+
+      renderAdmin();
+      renderApp();
+    }
+
+    // Изменение баланса
+    function openAdminBalanceModal(username) {
+      document.getElementById('admin-target-username').value = username;
+      document.getElementById('admin-modal-target-user').textContent = `Счёт: ${username}`;
+      document.getElementById('admin-modal-amount').value = '';
+      document.getElementById('admin-modal-reason').value = '';
+      document.getElementById('admin-balance-modal').classList.remove('hidden');
+    }
+
+    function closeAdminBalanceModal() {
+      document.getElementById('admin-balance-modal').classList.add('hidden');
+    }
+
+    function handleAdminBalanceSubmit(e) {
+      e.preventDefault();
+      const targetUsername = document.getElementById('admin-target-username').value;
+      const amount = parseInt(document.getElementById('admin-modal-amount').value);
+      const reason = document.getElementById('admin-modal-reason').value.trim();
+      const actionType = document.querySelector('input[name="admin-action-type"]:checked').value;
+
+      if (isNaN(amount) || amount < 0) {
+        showToast('Введите корректную сумму', 'error');
+        return;
+      }
+
+      const users = getUsers();
+      const user = users.find(u => u.username === targetUsername);
+      if (!user) return;
+
+      let diff = 0;
+      if (actionType === 'add') {
+        user.balance += amount;
+        diff = amount;
+      } else if (actionType === 'deduct') {
+        user.balance = Math.max(0, user.balance - amount);
+        diff = -amount;
+      } else if (actionType === 'set') {
+        diff = amount - user.balance;
+        user.balance = amount;
+      }
+
+      saveUsers(users);
+
+      const txObj = {
+        id: 'ADM-' + Math.floor(1000 + Math.random() * 9000),
+        from: 'Черьбанк (Администрация)',
+        to: user.username,
+        amount: Math.abs(diff),
+        fee: 0,
+        comment: `[Корректировка счёта]: ${reason}`,
+        date: new Date().toLocaleString('ru-RU')
+      };
+      const txList = getTransactions();
+      txList.unshift(txObj);
+      saveTransactions(txList);
+
+      closeAdminBalanceModal();
+      playSound('success');
+      showToast(`Баланс игрока ${user.username} обновлен!`, 'success');
+
+      renderAdmin();
+      renderApp();
+    }
+
+    // Удаление пользователя
+    function confirmDeleteUser(username) {
+      if (username.toLowerCase() === 'admin') {
+        showToast('Аккаунт главного администратора не может быть удален', 'error');
+        return;
+      }
+      userToDelete = username;
+      document.getElementById('delete-user-target-name').textContent = username;
+      document.getElementById('delete-user-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteUserModal() {
+      userToDelete = null;
+      document.getElementById('delete-user-modal').classList.add('hidden');
+    }
+
+    function executeDeleteUser() {
+      if (!userToDelete) return;
+      let users = getUsers();
+      users = users.filter(u => u.username !== userToDelete);
+      saveUsers(users);
+
+      closeDeleteUserModal();
+      playSound('success');
+      showToast(`Аккаунт ${userToDelete} удален`, 'info');
+      renderAdmin();
+      renderApp();
+    }
+
+    // Очистка БД
+    function openResetModal() {
+      document.getElementById('reset-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      document.getElementById('reset-confirm-modal').classList.add('hidden');
+    }
+
+    function executeDatabaseReset() {
+      localStorage.removeItem(STORAGE_KEY_USERS);
+      localStorage.removeItem(STORAGE_KEY_TX);
+      localStorage.removeItem(STORAGE_KEY_SETTINGS);
+      localStorage.removeItem(STORAGE_KEY_SESSION);
+
+      initDatabase();
+      closeResetModal();
+      playSound('success');
+      showToast('База данных банка очищена', 'success');
+      renderApp();
+    }
+
+    /* ------------------------------------------
+     * ИНИЦИАЛИЗАЦИЯ
+     * ------------------------------------------ */
+    window.onload = function() {
+      initDatabase();
+      renderApp();
+    };
+  </script>
+</body>
+</html>
