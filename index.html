@@ -912,6 +912,10 @@
                 <div class="flex items-center gap-2">
                   <h2 class="text-xl font-black text-white">Панель Управления Черьбанком</h2>
                   <span class="text-[10px] bg-amber-500/20 text-amber-300 font-mono px-2 py-0.5 rounded-full border border-amber-500/30">ADMIN MASTER</span>
+                  <span id="db-status-badge" class="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Единая база (Live)</span>
+                  </span>
                 </div>
                 <p class="text-xs text-slate-400">Полный контроль финансовых ставок, счетов игроков и транзакций</p>
               </div>
@@ -998,10 +1002,16 @@
               <i data-lucide="users" class="w-5 h-5 text-amber-400"></i>
               <span>Все зарегистрированные счета игроков</span>
             </h3>
-            <div class="relative w-full sm:w-72">
-              <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
-              <input type="text" id="admin-search-input" oninput="renderAdminUsersTable()" placeholder="Поиск по нику или карте..."
-                class="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-amber-500 outline-none font-mono">
+            <div class="flex items-center gap-2">
+              <button onclick="syncWithServer(true)" class="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-400 hover:text-amber-400 transition flex items-center gap-1.5 text-xs font-semibold" title="Синхронизировать данные игроков">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Обновить</span>
+              </button>
+              <div class="relative w-full sm:w-72">
+                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-500"></i>
+                <input type="text" id="admin-search-input" oninput="renderAdminUsersTable()" placeholder="Поиск по нику или карте..."
+                  class="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-600 focus:border-amber-500 outline-none font-mono">
+              </div>
             </div>
           </div>
 
@@ -1327,6 +1337,90 @@
       depositTermDays: 3
     };
 
+    let isSyncing = false;
+    let syncIntervalId = null;
+
+    async function syncWithServer(manual = false) {
+      if (isSyncing) return;
+      isSyncing = true;
+      const badge = document.getElementById('db-status-badge');
+      try {
+        const res = await fetch('/api/sync');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.users)) {
+            // First-time seed: if DB has no users yet, but local storage has users, upload them
+            const localUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
+            if (data.users.length === 0 && localUsers.length > 0) {
+              const localTx = JSON.parse(localStorage.getItem(STORAGE_KEY_TX) || '[]');
+              await fetch('/api/seed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ localUsers, localTx })
+              });
+              const reRes = await fetch('/api/sync');
+              if (reRes.ok) {
+                const reData = await reRes.json();
+                data.users = reData.users;
+                data.transactions = reData.transactions;
+                data.settings = reData.settings;
+              }
+            }
+
+            localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(data.users));
+            if (data.transactions) {
+              localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(data.transactions));
+            }
+            if (data.settings) {
+              localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(data.settings));
+            }
+
+            if (badge) {
+              badge.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1';
+              badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Единая база (Live)</span>';
+            }
+
+            // Re-render views if user is logged in
+            const currentU = getCurrentUsername();
+            if (currentU) {
+              const uData = getCurrentUserData();
+              if (uData) {
+                document.getElementById('header-username').textContent = uData.username;
+                document.getElementById('user-avatar-letter').textContent = uData.username.charAt(0).toUpperCase();
+                
+                // If on admin tab, refresh tables
+                const activeAdmin = document.getElementById('tab-content-admin');
+                if (activeAdmin && !activeAdmin.classList.contains('hidden')) {
+                  renderAdminUsersTable();
+                  renderAdminAuditTable();
+                } else {
+                  renderDashboard();
+                }
+              }
+            }
+
+            if (manual) {
+              showToast(`База данных синхронизирована (Игроков: ${data.users.length})`, 'success');
+              playSound('success');
+            }
+          }
+        } else {
+          if (badge) {
+            badge.className = 'text-[10px] bg-amber-500/20 text-amber-300 font-mono px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1';
+            badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Локальный режим</span>';
+          }
+        }
+      } catch (err) {
+        console.warn('Sync warning:', err);
+        if (badge) {
+          badge.className = 'text-[10px] bg-amber-500/20 text-amber-300 font-mono px-2 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1';
+          badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Локальный режим</span>';
+        }
+      } finally {
+        isSyncing = false;
+      }
+    }
+
     function initDatabase() {
       if (!localStorage.getItem(STORAGE_KEY_USERS)) {
         localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify([]));
@@ -1336,6 +1430,14 @@
       }
       if (!localStorage.getItem(STORAGE_KEY_SETTINGS)) {
         localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(defaultSettings));
+      }
+
+      // Initial server sync
+      syncWithServer(false);
+
+      if (!syncIntervalId) {
+        syncIntervalId = setInterval(() => syncWithServer(false), 4000);
+        window.addEventListener('focus', () => syncWithServer(false));
       }
     }
 
@@ -1354,6 +1456,29 @@
 
     function saveUsers(users) {
       localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+      const currentU = getCurrentUsername();
+      if (currentU) {
+        const uObj = users.find(u => u.username.toLowerCase() === currentU.toLowerCase());
+        if (uObj) {
+          fetch('/api/user/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: uObj.username,
+              updates: {
+                balance: uObj.balance,
+                isFrozen: uObj.isFrozen,
+                isVerified: uObj.isVerified,
+                hasCherPlus: uObj.hasCherPlus,
+                cardSkin: uObj.cardSkin,
+                bioUrl: uObj.bioUrl,
+                activeLoan: uObj.activeLoan,
+                activeDeposit: uObj.activeDeposit
+              }
+            })
+          }).catch(e => console.warn('User update sync warning:', e));
+        }
+      }
     }
 
     function getTransactions() {
@@ -1362,6 +1487,22 @@
 
     function saveTransactions(txList) {
       localStorage.setItem(STORAGE_KEY_TX, JSON.stringify(txList));
+      if (txList.length > 0) {
+        const latest = txList[0];
+        fetch('/api/transaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: latest.id,
+            fromUser: latest.from,
+            toUser: latest.to,
+            amount: latest.amount,
+            fee: latest.fee,
+            comment: latest.comment,
+            date: latest.date
+          })
+        }).catch(e => console.warn('Tx record sync warning:', e));
+      }
     }
 
     function getCurrentUsername() {
@@ -1487,10 +1628,33 @@
       }
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const uInput = document.getElementById('login-username').value.trim();
       const pInput = document.getElementById('login-password').value.trim();
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: uInput, password: pInput })
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          setCurrentUser(data.user.username);
+          playSound('success');
+          showToast(`Добро пожаловать в Черьбанк, ${data.user.username}!`, 'success');
+          await syncWithServer();
+          renderApp();
+          return;
+        } else if (res.status === 401 || res.status === 404 || res.status === 400) {
+          playSound('error');
+          showToast(data.error || 'Неверный логин или пароль', 'error');
+          return;
+        }
+      } catch (err) {
+        console.warn('Login API error, checking local store:', err);
+      }
 
       const users = getUsers();
       const user = users.find(u => u.username.toLowerCase() === uInput.toLowerCase());
@@ -1513,7 +1677,7 @@
       renderApp();
     }
 
-    function handleRegister(e) {
+    async function handleRegister(e) {
       e.preventDefault();
       const uInput = document.getElementById('reg-username').value.trim();
       const pInput = document.getElementById('reg-password').value.trim();
@@ -1521,6 +1685,39 @@
       if (uInput.length < 2) {
         showToast('Никнейм должен содержать минимум 2 символа', 'error');
         return;
+      }
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: uInput, password: pInput })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          playSound('error');
+          showToast(data.error || 'Ошибка при регистрации', 'error');
+          return;
+        }
+
+        const newUser = data.user;
+        setCurrentUser(newUser.username);
+        playSound('success');
+
+        if (newUser.isAdmin) {
+          showToast('Создан аккаунт Администратора! Панель управления активирована.', 'warning');
+        } else {
+          showToast('Счёт успешно открыт! Стартовый баланс: $1,000.', 'success');
+        }
+
+        document.getElementById('reg-username').value = '';
+        document.getElementById('reg-password').value = '';
+
+        await syncWithServer();
+        renderApp();
+        return;
+      } catch (err) {
+        console.warn('Register API error, fallback to local:', err);
       }
 
       const users = getUsers();
@@ -1531,7 +1728,6 @@
         return;
       }
 
-      // Если имя "Admin" или "admin" — это единственный способ получить права админа
       const isAdminRole = uInput.toLowerCase() === 'admin';
 
       const newUser = {
@@ -1845,7 +2041,7 @@
       }
     }
 
-    function handleTransferSubmit(e) {
+    async function handleTransferSubmit(e) {
       e.preventDefault();
       const currentUser = getCurrentUserData();
       if (!currentUser) return;
@@ -1864,6 +2060,42 @@
       if (!amount || amount <= 0) {
         showToast('Укажите корректную сумму перевода', 'error');
         return;
+      }
+
+      try {
+        const res = await fetch('/api/transfer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fromUsername: currentUser.username,
+            target: recipientQuery,
+            amount: amount,
+            comment: comment
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          playSound('success');
+          showToast(`Перевод $${amount.toLocaleString()} отправлен!`, 'success');
+
+          document.getElementById('transfer-recipient').value = '';
+          document.getElementById('transfer-amount').value = '';
+          document.getElementById('transfer-comment').value = '';
+          updateTransferFeeCalculation();
+
+          if (data.tx) {
+            openReceiptModal(data.tx);
+          }
+          await syncWithServer();
+          renderApp();
+          return;
+        } else if (!res.ok) {
+          playSound('error');
+          showToast(data.error || 'Ошибка перевода', 'error');
+          return;
+        }
+      } catch (err) {
+        console.warn('Transfer API error, fallback to local:', err);
       }
 
       const fee = currentUser.hasCherPlus ? 0 : Math.round(amount * (settings.transferFeePercent / 100));
@@ -2482,19 +2714,26 @@
       if (!user || !user.isAdmin) return;
 
       const settings = getBankSettings();
-      document.getElementById('setting-transfer-fee').value = settings.transferFeePercent;
-      document.getElementById('setting-loan-rate').value = settings.loanRatePercent;
-      document.getElementById('setting-loan-max').value = settings.loanMaxAmount;
-      document.getElementById('setting-loan-days').value = settings.loanMaxTermDays;
-      document.getElementById('setting-loan-penalty').value = settings.loanPenaltyAmount;
-      document.getElementById('setting-deposit-rate').value = settings.depositRatePercent;
-      document.getElementById('setting-deposit-days').value = settings.depositTermDays;
+      const feeInput = document.getElementById('setting-transfer-fee');
+      if (document.activeElement !== feeInput) feeInput.value = settings.transferFeePercent;
+      const loanRateInput = document.getElementById('setting-loan-rate');
+      if (document.activeElement !== loanRateInput) loanRateInput.value = settings.loanRatePercent;
+      const loanMaxInput = document.getElementById('setting-loan-max');
+      if (document.activeElement !== loanMaxInput) loanMaxInput.value = settings.loanMaxAmount;
+      const loanDaysInput = document.getElementById('setting-loan-days');
+      if (document.activeElement !== loanDaysInput) loanDaysInput.value = settings.loanMaxTermDays;
+      const loanPenaltyInput = document.getElementById('setting-loan-penalty');
+      if (document.activeElement !== loanPenaltyInput) loanPenaltyInput.value = settings.loanPenaltyAmount;
+      const depRateInput = document.getElementById('setting-deposit-rate');
+      if (document.activeElement !== depRateInput) depRateInput.value = settings.depositRatePercent;
+      const depDaysInput = document.getElementById('setting-deposit-days');
+      if (document.activeElement !== depDaysInput) depDaysInput.value = settings.depositTermDays;
 
       renderAdminUsersTable();
       renderAdminAuditTable();
     }
 
-    function saveBankSettings() {
+    async function saveBankSettings() {
       const newSettings = {
         transferFeePercent: parseInt(document.getElementById('setting-transfer-fee').value) || 0,
         loanRatePercent: parseInt(document.getElementById('setting-loan-rate').value) || 0,
@@ -2506,6 +2745,15 @@
       };
 
       saveSettings(newSettings);
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings)
+        });
+      } catch (e) {
+        console.warn('Save settings API warning:', e);
+      }
       playSound('success');
       showToast('Глобальные параметры банка успешно обновлены!', 'success');
       renderApp();
@@ -2606,7 +2854,7 @@
     }
 
     // Выдача/снятие верификации и автоматическая привязка ЧерьПлюс
-    function toggleUserVerified(targetUsername) {
+    async function toggleUserVerified(targetUsername) {
       const users = getUsers();
       const user = users.find(u => u.username === targetUsername);
       if (!user) return;
@@ -2621,6 +2869,18 @@
       }
 
       saveUsers(users);
+      try {
+        await fetch('/api/user/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: user.username,
+            updates: { isVerified: user.isVerified, hasCherPlus: user.hasCherPlus }
+          })
+        });
+      } catch (e) {
+        console.warn('Update user verified warning:', e);
+      }
       playSound('success');
       renderAdmin();
       renderApp();
@@ -2642,7 +2902,7 @@
       document.getElementById('admin-bio-modal').classList.add('hidden');
     }
 
-    function handleSaveBioSubmit(e) {
+    async function handleSaveBioSubmit(e) {
       e.preventDefault();
       const targetUsername = document.getElementById('bio-target-username').value;
       const url = document.getElementById('bio-url-input').value.trim();
@@ -2653,6 +2913,18 @@
 
       user.bioUrl = url;
       saveUsers(users);
+      try {
+        await fetch('/api/user/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: user.username,
+            updates: { bioUrl: url }
+          })
+        });
+      } catch (e) {
+        console.warn('Save bio warning:', e);
+      }
 
       closeAdminBioModal();
       playSound('success');
@@ -2662,13 +2934,25 @@
     }
 
     // Заморозка
-    function toggleUserFreeze(targetUsername) {
+    async function toggleUserFreeze(targetUsername) {
       const users = getUsers();
       const user = users.find(u => u.username === targetUsername);
       if (!user) return;
 
       user.isFrozen = !user.isFrozen;
       saveUsers(users);
+      try {
+        await fetch('/api/user/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: user.username,
+            updates: { isFrozen: user.isFrozen }
+          })
+        });
+      } catch (e) {
+        console.warn('Update user freeze warning:', e);
+      }
 
       const statusText = user.isFrozen ? 'заморожен' : 'разморожен';
       showToast(`Счёт ${user.username} ${statusText}`, user.isFrozen ? 'warning' : 'success');
@@ -2691,7 +2975,7 @@
       document.getElementById('admin-balance-modal').classList.add('hidden');
     }
 
-    function handleAdminBalanceSubmit(e) {
+    async function handleAdminBalanceSubmit(e) {
       e.preventDefault();
       const targetUsername = document.getElementById('admin-target-username').value;
       const amount = parseInt(document.getElementById('admin-modal-amount').value);
@@ -2701,6 +2985,29 @@
       if (isNaN(amount) || amount < 0) {
         showToast('Введите корректную сумму', 'error');
         return;
+      }
+
+      try {
+        const res = await fetch('/api/admin/balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUsername, actionType, amount, reason })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeAdminBalanceModal();
+          playSound('success');
+          showToast(`Баланс игрока ${targetUsername} обновлен!`, 'success');
+          await syncWithServer();
+          renderAdmin();
+          renderApp();
+          return;
+        } else if (!res.ok) {
+          showToast(data.error || 'Ошибка изменения баланса', 'error');
+          return;
+        }
+      } catch (err) {
+        console.warn('Admin balance API warning, fallback to local:', err);
       }
 
       const users = getUsers();
@@ -2758,15 +3065,28 @@
       document.getElementById('delete-user-modal').classList.add('hidden');
     }
 
-    function executeDeleteUser() {
+    async function executeDeleteUser() {
       if (!userToDelete) return;
+      const targetUser = userToDelete;
+
+      try {
+        await fetch('/api/admin/delete-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: targetUser })
+        });
+      } catch (e) {
+        console.warn('Delete user API warning:', e);
+      }
+
       let users = getUsers();
-      users = users.filter(u => u.username !== userToDelete);
+      users = users.filter(u => u.username !== targetUser);
       saveUsers(users);
 
       closeDeleteUserModal();
       playSound('success');
-      showToast(`Аккаунт ${userToDelete} удален`, 'info');
+      showToast(`Аккаунт ${targetUser} удален`, 'info');
+      await syncWithServer();
       renderAdmin();
       renderApp();
     }
@@ -2780,7 +3100,13 @@
       document.getElementById('reset-confirm-modal').classList.add('hidden');
     }
 
-    function executeDatabaseReset() {
+    async function executeDatabaseReset() {
+      try {
+        await fetch('/api/admin/reset', { method: 'POST' });
+      } catch (e) {
+        console.warn('Reset API warning:', e);
+      }
+
       localStorage.removeItem(STORAGE_KEY_USERS);
       localStorage.removeItem(STORAGE_KEY_TX);
       localStorage.removeItem(STORAGE_KEY_SETTINGS);
